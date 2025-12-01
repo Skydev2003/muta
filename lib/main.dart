@@ -1,23 +1,30 @@
 import 'package:flutter/material.dart';
-import 'package:muta/src/screen/table_screen.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:muta/src/routes/app_router.dart';
+import 'package:muta/src/theme/app_theme.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  await Supabase.initialize(
+    url: 'https://vdhaeocpcxiefuzetikh.supabase.co',
+    anonKey:
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZkaGFlb2NwY3hpZWZ1emV0aWtoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ1MTg2MjUsImV4cCI6MjA4MDA5NDYyNX0.l6FNEKc9IgtCWWe4tHT9ycm1LNsWPDCxEOL6GjlWho4',
+  );
+  runApp(ProviderScope(child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
+      debugShowCheckedModeBanner: false,
       title: 'Muta',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
-      home: const TableScreen(),
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: ThemeMode.system,
+      routerConfig: router,
     );
   }
 }
-
