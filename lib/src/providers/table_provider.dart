@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:muta/models/table_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Provider to fetch list of tables
@@ -29,16 +30,16 @@ final addTableProvider =
 
 /// Provider to fetch table details by ID
 final tableDetailProvider =
-    FutureProvider.family<Map<String, dynamic>, int>((
-      ref,
-      id,
-    ) async {
+    FutureProvider.family<TableModel, int>((ref, id) async {
       final supabase = Supabase.instance.client;
-      final response =
+
+      final data =
           await supabase
               .from('tables')
               .select()
               .eq('id', id)
               .single();
-      return response;
+
+      return TableModel.fromJson(data);
     });
+

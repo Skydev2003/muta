@@ -19,27 +19,3 @@ final sessionStreamProvider = StreamProvider.family<
         (rows) => rows.map(SessionModel.fromJson).toList(),
       );
 });
-
-/// Provider to open a new session
-final openTableProvider =
-    FutureProvider.family<int, Map<String, dynamic>>((
-      ref,
-      data,
-    ) async {
-      final supabase = Supabase.instance.client;
-
-      final res =
-          await supabase
-              .from('table_sessions')
-              .insert(data)
-              .select('id')
-              .single();
-
-      // set table status = using
-      await supabase
-          .from('tables')
-          .update({'status': 'using'})
-          .eq('id', data['table_id']);
-
-      return res['id'] as int;
-    });

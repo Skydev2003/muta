@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:muta/src/providers/session_provider.dart';
+import 'package:muta/src/providers/open_table_provider.dart';
 
 class OpenTableScreen extends ConsumerStatefulWidget {
   const OpenTableScreen({super.key, required this.id});
@@ -16,27 +16,14 @@ class _OpenTableScreenState
     extends ConsumerState<OpenTableScreen> {
   int customerCount = 1;
 
-  void _startSession() async {
-    final sessionData = {
-      "table_id": widget.id,
-      "customer_count": customerCount,
-      "start_time": DateTime.now().toIso8601String(),
-      "end_time":
-          DateTime.now()
-              .add(const Duration(minutes: 90))
-              .toIso8601String(),
-      "status": "using",
-    };
-
+  Future<void> _start() async {
     final sessionId = await ref.read(
-      openTableProvider(sessionData).future,
+      openTableProvider((widget.id, customerCount)).future,
     );
 
     if (!mounted) return;
 
-    // ไป table_detail พร้อม sessionId
-    ref.context.push('/table_detail$sessionId');
-
+    context.push('/table_detail/${widget.id}');
   }
 
   @override
@@ -46,11 +33,11 @@ class _OpenTableScreenState
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
         title: const Text(
-          'เปิดโต๊ะ',
+          "เปิดโต๊ะ",
           style: TextStyle(color: Colors.white),
         ),
-        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -59,19 +46,18 @@ class _OpenTableScreenState
             "โต๊ะ ${widget.id}",
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 28,
+              fontSize: 26,
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           const Text(
             "จำนวนลูกค้า",
             style: TextStyle(color: Colors.white70),
           ),
+          const SizedBox(height: 30),
 
-          const SizedBox(height: 40),
-
-          // เลือกจำนวนลูกค้า
+          // ================ เลือกจำนวนลูกค้า ================
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -89,15 +75,14 @@ class _OpenTableScreenState
               Text(
                 "$customerCount",
                 style: const TextStyle(
-                  fontSize: 28,
+                  fontSize: 30,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
               ),
               IconButton(
-                onPressed: () {
-                  setState(() => customerCount++);
-                },
+                onPressed:
+                    () => setState(() => customerCount++),
                 icon: const Icon(
                   Icons.add,
                   color: Colors.white,
@@ -108,9 +93,9 @@ class _OpenTableScreenState
 
           const Spacer(),
 
-          // ปุ่มเริ่มจับเวลา
+          // ================ ปุ่มเริ่มจับเวลา ================
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(16),
             child: SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -120,12 +105,12 @@ class _OpenTableScreenState
                     vertical: 16,
                   ),
                 ),
-                onPressed: _startSession,
+                onPressed: _start,
                 child: const Text(
                   "เริ่มจับเวลา",
                   style: TextStyle(
-                    color: Colors.white,
                     fontSize: 18,
+                    color: Colors.white,
                   ),
                 ),
               ),

@@ -23,7 +23,7 @@ final router = GoRouter(
       },
     ),
   GoRoute(
-      path: '/table_detail:id',
+      path: '/table_detail/:id',
       builder: (context, state) {
         final id = int.parse(state.pathParameters['id']!);
         return TableDetailScreen(id: id);
