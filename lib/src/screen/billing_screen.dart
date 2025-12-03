@@ -64,7 +64,7 @@ class BillingScreen extends ConsumerWidget {
                           Expanded(
                             child: _infoCard(
                               title: "หมายเลขโต๊ะ",
-                              value: "A$tableId",
+                              value: "T0$tableId",
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -235,7 +235,7 @@ class BillingScreen extends ConsumerWidget {
                                   sessionId: sessionId,
                                   totalPrice: total,
                                   items: orders.length,
-                                  tableName: 'T0$tableId',
+                                  tableName: "T$tableId",
                                 );
 
                             await ref
