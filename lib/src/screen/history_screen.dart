@@ -21,8 +21,8 @@ class _HistoryScreenState
   @override
   Widget build(BuildContext context) {
     final historyAsync = ref.watch(historyProvider);
-   logger.i('open history screen');
-   logger.d(historyAsync);
+    logger.i('open history screen');
+    logger.d(historyAsync);
     return Scaffold(
       backgroundColor: const Color(0xFF1A1123),
 
@@ -118,7 +118,6 @@ class _HistoryScreenState
           Expanded(
             child: historyAsync.when(
               data: (list) {
-                
                 // 1) filter keyword
                 var result =
                     list.where((h) {

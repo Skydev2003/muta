@@ -106,3 +106,18 @@ final orderProvider =
     StateNotifierProvider<OrderNotifier, List<OrderModel>>(
   (ref) => OrderNotifier(ref),
 );
+
+// Provider สำหรับโหลดออเดอร์ตาม sessionId
+final loadOrdersBySessionProvider = FutureProvider.family<
+  List<OrderModel>,
+  int
+>((ref, sessionId) async {
+  final supabase = Supabase.instance.client;
+
+  final data = await supabase
+      .from('orders')
+      .select()
+      .eq('session_id', sessionId);
+
+  return data.map((e) => OrderModel.fromJson(e)).toList();
+});

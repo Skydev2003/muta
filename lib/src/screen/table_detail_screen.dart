@@ -45,28 +45,45 @@ class _TableDetailScreenState
     return Scaffold(
       backgroundColor: const Color(0xFF1A1123),
 
-      // -------------------- APP BAR --------------------
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
-        title: timer.maybeWhen(
+        title: timer.when(
           data: (session) {
-            final left = session.timeLeft; // Duration?
-            final minutes = left?.inMinutes ?? 0;
+            final left = session.timeLeft ?? Duration.zero;
+
+            // นาทีทั้งหมด (ไม่ตัดเศษชั่วโมง)
+            final mm = left.inMinutes;
+
+            // วินาที (ตัดเฉพาะเศษ 60)
+            final ss = (left.inSeconds % 60)
+                .toString()
+                .padLeft(2, '0');
 
             return Text(
-              "โต๊ะ ${widget.id} | เวลาคงเหลือ $minutes นาที",
-              style: const TextStyle(color: Colors.white),
+              "โต๊ะ ${widget.id} | เหลือเวลา $mm:$ss นาที",
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 15,
+              ),
             );
           },
-          orElse:
+
+          loading:
               () => Text(
+                "โต๊ะ ${widget.id} | ...",
+                style: const TextStyle(color: Colors.white),
+              ),
+
+          error:
+              (_, __) => Text(
                 "โต๊ะ ${widget.id}",
                 style: const TextStyle(color: Colors.white),
               ),
         ),
       ),
+
 
       body: Column(
         children: [

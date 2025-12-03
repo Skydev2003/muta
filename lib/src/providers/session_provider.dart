@@ -2,9 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:muta/models/session_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-/// เวลาให้แต่ละโต๊ะ = 90 นาที
-const Duration totalDuration = Duration(minutes: 90);
-
 final sessionByTableProvider =
     FutureProvider.family<SessionModel, int>((
       ref,
@@ -26,59 +23,25 @@ final sessionByTableProvider =
 
       final session = SessionModel.fromJson(response);
 
-      // 🟣 คำนวณ timeused (00:00:00)
+      // ⭐ แก้ตรงนี้: ใช้ UTC ทั้งหมด
       if (session.startTime != null) {
-        final start = DateTime.parse(session.startTime!);
-        final diff = DateTime.now().difference(start);
+        final start =
+            DateTime.parse(session.startTime!).toUtc();
+        final now = DateTime.now().toUtc();
+        final diff = now.difference(start);
 
         final hh = diff.inHours.toString().padLeft(2, '0');
-        final mm = (diff.inMinutes % 60).toString().padLeft(
-          2,
-          '0',
-        );
-        final ss = (diff.inSeconds % 60).toString().padLeft(
-          2,
-          '0',
-        );
+        final mm = diff.inMinutes
+            .remainder(60)
+            .toString()
+            .padLeft(2, '0');
+        final ss = diff.inSeconds
+            .remainder(60)
+            .toString()
+            .padLeft(2, '0');
 
         return session.copyWith(timeused: "$hh:$mm:$ss");
       }
 
       return session;
     });
-
-class SessionController extends StateNotifier<bool> {
-  SessionController(this.ref) : super(false);
-
-  final Ref ref;
-
-  Future<void> finishSession(
-    int tableId,
-    int sessionId,
-  ) async {
-    final client = Supabase.instance.client;
-
-    // 1) ปิด session
-    await client
-        .from('table_sessions')
-        .update({
-          'end_time': DateTime.now().toIso8601String(),
-          'status': 'finished',
-        })
-        .eq('id', sessionId);
-
-    // 2) อัปเดตสถานะโต๊ะ → dirty
-    await client
-        .from('tables')
-        .update({'status': 'dirty'})
-        .eq('id', tableId);
-
-    // 3) แจ้ง UI ว่าทำสำเร็จ
-    state = true;
-  }
-}
-
-final sessionProvider =
-    StateNotifierProvider<SessionController, bool>(
-      (ref) => SessionController(ref),
-    );
