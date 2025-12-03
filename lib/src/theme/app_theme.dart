@@ -1,86 +1,98 @@
 import 'package:flutter/material.dart';
 
-
 class AppTheme {
-  // สีหลักของแบรนด์
-  static const Color primaryPurple = Color(0xFF7C4DFF);
-  static const Color secondaryPurple = Color(0xFFB388FF);
-  static const Color darkBackground = Color(0xFF121212);
+  // โทนสีของร้านหมูกระทะ
+  static const Color bgDark = Color(
+    0xFF1E120E,
+  ); // พื้นหลังเข้ม
+  static const Color cardDark = Color(
+    0xFF2B1A15,
+  ); // การ์ดเมนู
+  static const Color orange = Color.fromARGB(255, 170, 0, 255); // ปุ่มเด่น
+  static const Color orangeSoft = Color.fromARGB(255, 86, 0, 125); // เน้นแบบนุ่ม
+  static const Color textLight = Colors.white;
+  static const Color textSoft = Colors.white70;
 
-  // ----------- Dark Theme -----------
+  // ---------------------------------------------------------
+  // DARK THEME
+  // ---------------------------------------------------------
   static ThemeData darkTheme = ThemeData(
     brightness: Brightness.dark,
     useMaterial3: true,
 
-    colorScheme: ColorScheme.dark(
-      primary: primaryPurple,
-      secondary: secondaryPurple,
-      surface: darkBackground,
+    scaffoldBackgroundColor: bgDark,
+
+    colorScheme: const ColorScheme.dark(
+      primary: orange,
+      secondary: orangeSoft,
+      surface: cardDark,
     ),
 
-    scaffoldBackgroundColor: darkBackground,
-
+    // -------- APP BAR --------
     appBarTheme: const AppBarTheme(
-      backgroundColor: darkBackground,
+      backgroundColor: bgDark,
       elevation: 0,
-      iconTheme: IconThemeData(color: Colors.white),
       titleTextStyle: TextStyle(
+        color: textLight,
         fontSize: 20,
-        color: Colors.white,
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.bold,
       ),
+      iconTheme: IconThemeData(color: textLight),
     ),
 
-    floatingActionButtonTheme:
-        const FloatingActionButtonThemeData(
-          backgroundColor: primaryPurple,
-          foregroundColor: Colors.white,
-        ),
-
+    // -------- BUTTON --------
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: primaryPurple,
+        backgroundColor: orange,
         foregroundColor: Colors.white,
-        textStyle: const TextStyle(fontSize: 16),
         padding: const EdgeInsets.symmetric(
           vertical: 14,
           horizontal: 20,
         ),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(
-            Radius.circular(12),
+            Radius.circular(14),
+          ),
+        ),
+        textStyle: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    ),
+
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        side: const BorderSide(color: textSoft),
+        foregroundColor: textLight,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(
+            Radius.circular(14),
           ),
         ),
       ),
     ),
 
+    // -------- TEXT --------
     textTheme: const TextTheme(
-      bodyMedium: TextStyle(color: Colors.white),
-      bodyLarge: TextStyle(color: Colors.white),
-      titleLarge: TextStyle(color: Colors.white),
-    ),
-  );
-
-  // ----------- Light Theme (ถ้าต้องการ) -----------
-  static ThemeData lightTheme = ThemeData(
-    brightness: Brightness.light,
-    useMaterial3: true,
-
-    colorScheme: const ColorScheme.light(
-      primary: primaryPurple,
-      secondary: secondaryPurple,
-      surface: Colors.white,
+      bodyMedium: TextStyle(color: textLight),
+      bodyLarge: TextStyle(color: textLight),
+      titleLarge: TextStyle(
+        color: textLight,
+        fontSize: 22,
+        fontWeight: FontWeight.bold,
+      ),
     ),
 
-    appBarTheme: const AppBarTheme(
-      backgroundColor: primaryPurple,
-      foregroundColor: Colors.white,
-    ),
-
-    elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: primaryPurple,
-        foregroundColor: Colors.white,
+    // -------- INPUT FIELD --------
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: cardDark,
+      labelStyle: const TextStyle(color: textSoft),
+      hintStyle: const TextStyle(color: textSoft),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide.none,
       ),
     ),
   );

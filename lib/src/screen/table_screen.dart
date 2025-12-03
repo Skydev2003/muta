@@ -13,7 +13,7 @@ class TableScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: AppTheme.primaryPurple,
+        backgroundColor: AppTheme.bgDark,
         title: Text('Table Screen'),
         actions: [
           IconButton(

@@ -21,8 +21,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       title: 'Muta',
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
+      theme: AppTheme.darkTheme,
       themeMode: ThemeMode.system,
       routerConfig: router,
     );
