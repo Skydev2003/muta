@@ -1,10 +1,14 @@
-         import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
 import 'package:muta/src/providers/order_provider.dart';
+import 'package:muta/src/providers/session_provider.dart';
 
 class CartScreen extends ConsumerWidget {
   final int tableId;
+  
+  
 
   const CartScreen({super.key, required this.tableId});
 
@@ -156,15 +160,22 @@ class CartScreen extends ConsumerWidget {
                     vertical: 14,
                   ),
                 ),
-                onPressed: () {
-                  ref
+                onPressed: () async {
+                  final session = await ref.read(
+                   sessionByTableProvider(tableId).future,
+                  );
+
+                  final sessionId = session.id!;
+
+                  await ref
                       .read(orderProvider.notifier)
-                      .submitOrders(tableId);
-                 ref.context.go('/table');
+                      .submitOrders(sessionId);
+
+                  ref.context.go('/table');
                 },
                 child: const Text(
-                  "ยืนยันออเดอร์",
-                  
+                  "ยืนยันการสั่งอาหาร",
+
                   style: TextStyle(
                     fontSize: 18,
                     color: Colors.white,

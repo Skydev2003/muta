@@ -26,7 +26,7 @@ mixin _$OrderModel {
   @JsonKey(name: 'session_id')
   String? get sessionId => throw _privateConstructorUsedError;
   @JsonKey(name: 'menu_id')
-  String? get menuId => throw _privateConstructorUsedError;
+  int? get menuId => throw _privateConstructorUsedError;
   @JsonKey(name: 'quantity')
   int? get quantity => throw _privateConstructorUsedError;
   @JsonKey(name: 'price')
@@ -58,7 +58,7 @@ abstract class $OrderModelCopyWith<$Res> {
   $Res call({
     @JsonKey(name: 'id') int? id,
     @JsonKey(name: 'session_id') String? sessionId,
-    @JsonKey(name: 'menu_id') String? menuId,
+    @JsonKey(name: 'menu_id') int? menuId,
     @JsonKey(name: 'quantity') int? quantity,
     @JsonKey(name: 'price') int? price,
     @JsonKey(name: 'created_at') String? createdAt,
@@ -107,7 +107,7 @@ class _$OrderModelCopyWithImpl<$Res, $Val extends OrderModel>
                 freezed == menuId
                     ? _value.menuId
                     : menuId // ignore: cast_nullable_to_non_nullable
-                        as String?,
+                        as int?,
             quantity:
                 freezed == quantity
                     ? _value.quantity
@@ -151,7 +151,7 @@ abstract class _$$OrderModelImplCopyWith<$Res>
   $Res call({
     @JsonKey(name: 'id') int? id,
     @JsonKey(name: 'session_id') String? sessionId,
-    @JsonKey(name: 'menu_id') String? menuId,
+    @JsonKey(name: 'menu_id') int? menuId,
     @JsonKey(name: 'quantity') int? quantity,
     @JsonKey(name: 'price') int? price,
     @JsonKey(name: 'created_at') String? createdAt,
@@ -199,7 +199,7 @@ class __$$OrderModelImplCopyWithImpl<$Res>
             freezed == menuId
                 ? _value.menuId
                 : menuId // ignore: cast_nullable_to_non_nullable
-                    as String?,
+                    as int?,
         quantity:
             freezed == quantity
                 ? _value.quantity
@@ -255,7 +255,7 @@ class _$OrderModelImpl implements _OrderModel {
   final String? sessionId;
   @override
   @JsonKey(name: 'menu_id')
-  final String? menuId;
+  final int? menuId;
   @override
   @JsonKey(name: 'quantity')
   final int? quantity;
@@ -327,7 +327,7 @@ abstract class _OrderModel implements OrderModel {
   const factory _OrderModel({
     @JsonKey(name: 'id') final int? id,
     @JsonKey(name: 'session_id') final String? sessionId,
-    @JsonKey(name: 'menu_id') final String? menuId,
+    @JsonKey(name: 'menu_id') final int? menuId,
     @JsonKey(name: 'quantity') final int? quantity,
     @JsonKey(name: 'price') final int? price,
     @JsonKey(name: 'created_at') final String? createdAt,
@@ -346,7 +346,7 @@ abstract class _OrderModel implements OrderModel {
   String? get sessionId;
   @override
   @JsonKey(name: 'menu_id')
-  String? get menuId;
+  int? get menuId;
   @override
   @JsonKey(name: 'quantity')
   int? get quantity;

@@ -9,7 +9,7 @@ class OrderModel with _$OrderModel {
   const factory OrderModel({
   @JsonKey(name: 'id') int? id,
   @JsonKey(name: 'session_id') String? sessionId,
-  @JsonKey(name: 'menu_id') String? menuId,
+  @JsonKey(name: 'menu_id') int? menuId,
   @JsonKey(name: 'quantity') int? quantity,
   @JsonKey(name: 'price') int? price,
   @JsonKey(name: 'created_at') String? createdAt,

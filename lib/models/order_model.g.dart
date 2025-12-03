@@ -10,7 +10,7 @@ _$OrderModelImpl _$$OrderModelImplFromJson(Map<String, dynamic> json) =>
     _$OrderModelImpl(
       id: (json['id'] as num?)?.toInt(),
       sessionId: json['session_id'] as String?,
-      menuId: json['menu_id'] as String?,
+      menuId: (json['menu_id'] as num?)?.toInt(),
       quantity: (json['quantity'] as num?)?.toInt(),
       price: (json['price'] as num?)?.toInt(),
       createdAt: json['created_at'] as String?,

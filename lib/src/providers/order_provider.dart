@@ -3,16 +3,15 @@ import 'package:muta/models/menu_model.dart';
 import 'package:muta/models/order_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-
 class OrderNotifier
     extends StateNotifier<List<OrderModel>> {
   OrderNotifier(this.ref) : super([]);
 
   final Ref ref;
-
+// เพิ่มรายการอาหารลงในออเดอร์
   void addItem(MenuModel menu) {
     final index = state.indexWhere(
-      (o) => o.menuId == menu.id.toString(),
+      (o) => o.menuId == menu.id,
     );
 
     if (index != -1) {
@@ -29,22 +28,22 @@ class OrderNotifier
     }
 
     final newOrder = OrderModel(
-      id: null,
-      sessionId: null,
-      menuId: menu.id.toString(),
+      menuId: menu.id, 
       quantity: 1,
       price: menu.price ?? 0,
-      createdAt: null,
-      name: menu.name, // *** NEW ***
-      image: menu.imageUrl, // *** NEW ***
+      name: menu.name,
+      image: menu.imageUrl,
     );
 
     state = [...state, newOrder];
   }
 
+// เพิ่มจำนวนรายการ
   void increase(int index) {
+    final currentQuantity = state[index].quantity ?? 0;
+
     final updated = state[index].copyWith(
-      quantity: (state[index].quantity ?? 0) + 1,
+      quantity: currentQuantity + 1,
     );
 
     state = [
@@ -53,44 +52,37 @@ class OrderNotifier
       ...state.sublist(index + 1),
     ];
   }
-
+  // ลดจำนวนรายการ
   void decrease(int index) {
-    final qty = state[index].quantity ?? 0;
+    final currentQuantity = state[index].quantity ?? 0;
 
-    if (qty <= 1) {
-      remove(index);
-      return;
+    if (currentQuantity > 1) {
+      final updated = state[index].copyWith(
+        quantity: currentQuantity - 1,
+      );
+
+      state = [
+        ...state.sublist(0, index),
+        updated,
+        ...state.sublist(index + 1),
+      ];
+    } else {
+      state = [
+        ...state.sublist(0, index),
+        ...state.sublist(index + 1),
+      ];
     }
-
-    final updated = state[index].copyWith(
-      quantity: qty - 1,
-    );
-
-    state = [
-      ...state.sublist(0, index),
-      updated,
-      ...state.sublist(index + 1),
-    ];
   }
 
-  void remove(int index) {
-    final list = [...state]..removeAt(index);
-    state = list;
-  }
 
-  void clear() {
-    state = [];
-  }
+// ล้างออเดอร์ทั้งหมด
+  void clear() => state = [];
 
-  int get totalPrice {
-    return state.fold(
-      0,
-      (sum, item) =>
-          sum + ((item.price ?? 0) * (item.quantity ?? 0)),
-    );
-  }
+  int get totalPrice => state.fold(
+    0,
+    (sum, o) => sum + ((o.price ?? 0) * (o.quantity ?? 0)),
+  );
 
-  /// ส่งขึ้น Supabase
   Future<void> submitOrders(int sessionId) async {
     final supabase = Supabase.instance.client;
 
@@ -100,8 +92,6 @@ class OrderNotifier
         'menu_id': o.menuId,
         'quantity': o.quantity,
         'price': o.price,
-
-        // เพิ่มเพื่อให้บันทึก snapshot ของเมนูลง orders
         'name': o.name,
         'image': o.image,
       });
@@ -111,7 +101,8 @@ class OrderNotifier
   }
 }
 
+// Provider สำหรับจัดการออเดอร์
 final orderProvider =
     StateNotifierProvider<OrderNotifier, List<OrderModel>>(
-      (ref) => OrderNotifier(ref),
-    );
+  (ref) => OrderNotifier(ref),
+);
