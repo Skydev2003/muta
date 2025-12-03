@@ -188,7 +188,7 @@ class _HistoryScreenState
                                         .start,
                                 children: [
                                   Text(
-                                    "โต๊ะ ${h.sessionId}",
+                                    "โต๊ะ ${h.tableName ?? h.sessionId}",
                                     style: const TextStyle(
                                       color: Colors.white,
                                       fontSize: 17,

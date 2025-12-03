@@ -31,6 +31,8 @@ mixin _$HistoryModel {
   int? get items => throw _privateConstructorUsedError;
   @JsonKey(name: 'created_at')
   String? get createdAt => throw _privateConstructorUsedError;
+  @JsonKey(name: 'table_name')
+  String? get tableName => throw _privateConstructorUsedError;
 
   /// Serializes this HistoryModel to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -55,6 +57,7 @@ abstract class $HistoryModelCopyWith<$Res> {
     @JsonKey(name: 'total_price') int? totalPrice,
     @JsonKey(name: 'items') int? items,
     @JsonKey(name: 'created_at') String? createdAt,
+    @JsonKey(name: 'table_name') String? tableName,
   });
 }
 
@@ -78,6 +81,7 @@ class _$HistoryModelCopyWithImpl<$Res, $Val extends HistoryModel>
     Object? totalPrice = freezed,
     Object? items = freezed,
     Object? createdAt = freezed,
+    Object? tableName = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -106,6 +110,11 @@ class _$HistoryModelCopyWithImpl<$Res, $Val extends HistoryModel>
                     ? _value.createdAt
                     : createdAt // ignore: cast_nullable_to_non_nullable
                         as String?,
+            tableName:
+                freezed == tableName
+                    ? _value.tableName
+                    : tableName // ignore: cast_nullable_to_non_nullable
+                        as String?,
           )
           as $Val,
     );
@@ -127,6 +136,7 @@ abstract class _$$HistoryModelImplCopyWith<$Res>
     @JsonKey(name: 'total_price') int? totalPrice,
     @JsonKey(name: 'items') int? items,
     @JsonKey(name: 'created_at') String? createdAt,
+    @JsonKey(name: 'table_name') String? tableName,
   });
 }
 
@@ -149,6 +159,7 @@ class __$$HistoryModelImplCopyWithImpl<$Res>
     Object? totalPrice = freezed,
     Object? items = freezed,
     Object? createdAt = freezed,
+    Object? tableName = freezed,
   }) {
     return _then(
       _$HistoryModelImpl(
@@ -177,6 +188,11 @@ class __$$HistoryModelImplCopyWithImpl<$Res>
                 ? _value.createdAt
                 : createdAt // ignore: cast_nullable_to_non_nullable
                     as String?,
+        tableName:
+            freezed == tableName
+                ? _value.tableName
+                : tableName // ignore: cast_nullable_to_non_nullable
+                    as String?,
       ),
     );
   }
@@ -191,6 +207,7 @@ class _$HistoryModelImpl implements _HistoryModel {
     @JsonKey(name: 'total_price') this.totalPrice,
     @JsonKey(name: 'items') this.items,
     @JsonKey(name: 'created_at') this.createdAt,
+    @JsonKey(name: 'table_name') this.tableName,
   });
 
   factory _$HistoryModelImpl.fromJson(Map<String, dynamic> json) =>
@@ -211,10 +228,13 @@ class _$HistoryModelImpl implements _HistoryModel {
   @override
   @JsonKey(name: 'created_at')
   final String? createdAt;
+  @override
+  @JsonKey(name: 'table_name')
+  final String? tableName;
 
   @override
   String toString() {
-    return 'HistoryModel(id: $id, sessionId: $sessionId, totalPrice: $totalPrice, items: $items, createdAt: $createdAt)';
+    return 'HistoryModel(id: $id, sessionId: $sessionId, totalPrice: $totalPrice, items: $items, createdAt: $createdAt, tableName: $tableName)';
   }
 
   @override
@@ -229,13 +249,22 @@ class _$HistoryModelImpl implements _HistoryModel {
                 other.totalPrice == totalPrice) &&
             (identical(other.items, items) || other.items == items) &&
             (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt));
+                other.createdAt == createdAt) &&
+            (identical(other.tableName, tableName) ||
+                other.tableName == tableName));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, id, sessionId, totalPrice, items, createdAt);
+  int get hashCode => Object.hash(
+    runtimeType,
+    id,
+    sessionId,
+    totalPrice,
+    items,
+    createdAt,
+    tableName,
+  );
 
   /// Create a copy of HistoryModel
   /// with the given fields replaced by the non-null parameter values.
@@ -258,6 +287,7 @@ abstract class _HistoryModel implements HistoryModel {
     @JsonKey(name: 'total_price') final int? totalPrice,
     @JsonKey(name: 'items') final int? items,
     @JsonKey(name: 'created_at') final String? createdAt,
+    @JsonKey(name: 'table_name') final String? tableName,
   }) = _$HistoryModelImpl;
 
   factory _HistoryModel.fromJson(Map<String, dynamic> json) =
@@ -278,6 +308,9 @@ abstract class _HistoryModel implements HistoryModel {
   @override
   @JsonKey(name: 'created_at')
   String? get createdAt;
+  @override
+  @JsonKey(name: 'table_name')
+  String? get tableName;
 
   /// Create a copy of HistoryModel
   /// with the given fields replaced by the non-null parameter values.

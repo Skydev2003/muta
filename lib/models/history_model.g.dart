@@ -13,6 +13,7 @@ _$HistoryModelImpl _$$HistoryModelImplFromJson(Map<String, dynamic> json) =>
       totalPrice: (json['total_price'] as num?)?.toInt(),
       items: (json['items'] as num?)?.toInt(),
       createdAt: json['created_at'] as String?,
+      tableName: json['table_name'] as String?,
     );
 
 Map<String, dynamic> _$$HistoryModelImplToJson(_$HistoryModelImpl instance) =>
@@ -22,4 +23,5 @@ Map<String, dynamic> _$$HistoryModelImplToJson(_$HistoryModelImpl instance) =>
       'total_price': instance.totalPrice,
       'items': instance.items,
       'created_at': instance.createdAt,
+      'table_name': instance.tableName,
     };

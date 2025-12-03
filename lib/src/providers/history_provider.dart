@@ -30,6 +30,7 @@ class HistoryRepository {
     required int sessionId,
     required int totalPrice,
     required int items,
+    required String tableName,
   }) async {
     final supabase = Supabase.instance.client;
 
@@ -37,6 +38,8 @@ class HistoryRepository {
       'session_id': sessionId,
       'total_price': totalPrice,
       'items': items,
+      'table_name': tableName,
     });
   }
 }
+

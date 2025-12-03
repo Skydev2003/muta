@@ -12,6 +12,7 @@ class HistoryModel with _$HistoryModel {
   @JsonKey(name: 'total_price') int? totalPrice,
   @JsonKey(name: 'items') int? items,
   @JsonKey(name: 'created_at') String? createdAt,
+  @JsonKey(name: 'table_name') String? tableName,
   }) = _HistoryModel;
 
   factory HistoryModel.fromJson(Map<String, dynamic> json) => _$HistoryModelFromJson(json);

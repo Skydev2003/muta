@@ -21,7 +21,7 @@ class BillingScreen extends ConsumerWidget {
       sessionTimerProvider(tableId),
     ); // << ใช้ StreamProvider
     logger.d('Timer in BillingScreen: $timer');
-    
+
     return Scaffold(
       backgroundColor: const Color(0xFF1A1123),
       appBar: AppBar(
@@ -82,7 +82,6 @@ class BillingScreen extends ConsumerWidget {
 
                       // =================== TIME USED (REALTIME) ===================
                       timer.when(
-                        
                         data:
                             (t) => _infoCard(
                               title: "เวลาที่ใช้งาน",
@@ -236,6 +235,7 @@ class BillingScreen extends ConsumerWidget {
                                   sessionId: sessionId,
                                   totalPrice: total,
                                   items: orders.length,
+                                  tableName: 'T0$tableId',
                                 );
 
                             await ref
