@@ -24,7 +24,7 @@ mixin _$SessionModel {
   @JsonKey(name: 'id')
   int? get id => throw _privateConstructorUsedError;
   @JsonKey(name: 'table_id')
-  String? get tableId => throw _privateConstructorUsedError;
+  int? get tableId => throw _privateConstructorUsedError;
   @JsonKey(name: 'customer_count')
   int? get customerCount => throw _privateConstructorUsedError;
   @JsonKey(name: 'start_time')
@@ -33,6 +33,8 @@ mixin _$SessionModel {
   String? get endTime => throw _privateConstructorUsedError;
   @JsonKey(name: 'status')
   String? get status => throw _privateConstructorUsedError;
+  @JsonKey(name: 'timeused')
+  String? get timeused => throw _privateConstructorUsedError;
 
   /// Serializes this SessionModel to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -53,11 +55,12 @@ abstract class $SessionModelCopyWith<$Res> {
   @useResult
   $Res call({
     @JsonKey(name: 'id') int? id,
-    @JsonKey(name: 'table_id') String? tableId,
+    @JsonKey(name: 'table_id') int? tableId,
     @JsonKey(name: 'customer_count') int? customerCount,
     @JsonKey(name: 'start_time') String? startTime,
     @JsonKey(name: 'end_time') String? endTime,
     @JsonKey(name: 'status') String? status,
+    @JsonKey(name: 'timeused') String? timeused,
   });
 }
 
@@ -82,6 +85,7 @@ class _$SessionModelCopyWithImpl<$Res, $Val extends SessionModel>
     Object? startTime = freezed,
     Object? endTime = freezed,
     Object? status = freezed,
+    Object? timeused = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -94,7 +98,7 @@ class _$SessionModelCopyWithImpl<$Res, $Val extends SessionModel>
                 freezed == tableId
                     ? _value.tableId
                     : tableId // ignore: cast_nullable_to_non_nullable
-                        as String?,
+                        as int?,
             customerCount:
                 freezed == customerCount
                     ? _value.customerCount
@@ -115,6 +119,11 @@ class _$SessionModelCopyWithImpl<$Res, $Val extends SessionModel>
                     ? _value.status
                     : status // ignore: cast_nullable_to_non_nullable
                         as String?,
+            timeused:
+                freezed == timeused
+                    ? _value.timeused
+                    : timeused // ignore: cast_nullable_to_non_nullable
+                        as String?,
           )
           as $Val,
     );
@@ -132,11 +141,12 @@ abstract class _$$SessionModelImplCopyWith<$Res>
   @useResult
   $Res call({
     @JsonKey(name: 'id') int? id,
-    @JsonKey(name: 'table_id') String? tableId,
+    @JsonKey(name: 'table_id') int? tableId,
     @JsonKey(name: 'customer_count') int? customerCount,
     @JsonKey(name: 'start_time') String? startTime,
     @JsonKey(name: 'end_time') String? endTime,
     @JsonKey(name: 'status') String? status,
+    @JsonKey(name: 'timeused') String? timeused,
   });
 }
 
@@ -160,6 +170,7 @@ class __$$SessionModelImplCopyWithImpl<$Res>
     Object? startTime = freezed,
     Object? endTime = freezed,
     Object? status = freezed,
+    Object? timeused = freezed,
   }) {
     return _then(
       _$SessionModelImpl(
@@ -172,7 +183,7 @@ class __$$SessionModelImplCopyWithImpl<$Res>
             freezed == tableId
                 ? _value.tableId
                 : tableId // ignore: cast_nullable_to_non_nullable
-                    as String?,
+                    as int?,
         customerCount:
             freezed == customerCount
                 ? _value.customerCount
@@ -193,6 +204,11 @@ class __$$SessionModelImplCopyWithImpl<$Res>
                 ? _value.status
                 : status // ignore: cast_nullable_to_non_nullable
                     as String?,
+        timeused:
+            freezed == timeused
+                ? _value.timeused
+                : timeused // ignore: cast_nullable_to_non_nullable
+                    as String?,
       ),
     );
   }
@@ -208,6 +224,7 @@ class _$SessionModelImpl implements _SessionModel {
     @JsonKey(name: 'start_time') this.startTime,
     @JsonKey(name: 'end_time') this.endTime,
     @JsonKey(name: 'status') this.status,
+    @JsonKey(name: 'timeused') this.timeused,
   });
 
   factory _$SessionModelImpl.fromJson(Map<String, dynamic> json) =>
@@ -218,7 +235,7 @@ class _$SessionModelImpl implements _SessionModel {
   final int? id;
   @override
   @JsonKey(name: 'table_id')
-  final String? tableId;
+  final int? tableId;
   @override
   @JsonKey(name: 'customer_count')
   final int? customerCount;
@@ -231,10 +248,13 @@ class _$SessionModelImpl implements _SessionModel {
   @override
   @JsonKey(name: 'status')
   final String? status;
+  @override
+  @JsonKey(name: 'timeused')
+  final String? timeused;
 
   @override
   String toString() {
-    return 'SessionModel(id: $id, tableId: $tableId, customerCount: $customerCount, startTime: $startTime, endTime: $endTime, status: $status)';
+    return 'SessionModel(id: $id, tableId: $tableId, customerCount: $customerCount, startTime: $startTime, endTime: $endTime, status: $status, timeused: $timeused)';
   }
 
   @override
@@ -249,7 +269,9 @@ class _$SessionModelImpl implements _SessionModel {
             (identical(other.startTime, startTime) ||
                 other.startTime == startTime) &&
             (identical(other.endTime, endTime) || other.endTime == endTime) &&
-            (identical(other.status, status) || other.status == status));
+            (identical(other.status, status) || other.status == status) &&
+            (identical(other.timeused, timeused) ||
+                other.timeused == timeused));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -262,6 +284,7 @@ class _$SessionModelImpl implements _SessionModel {
     startTime,
     endTime,
     status,
+    timeused,
   );
 
   /// Create a copy of SessionModel
@@ -281,11 +304,12 @@ class _$SessionModelImpl implements _SessionModel {
 abstract class _SessionModel implements SessionModel {
   const factory _SessionModel({
     @JsonKey(name: 'id') final int? id,
-    @JsonKey(name: 'table_id') final String? tableId,
+    @JsonKey(name: 'table_id') final int? tableId,
     @JsonKey(name: 'customer_count') final int? customerCount,
     @JsonKey(name: 'start_time') final String? startTime,
     @JsonKey(name: 'end_time') final String? endTime,
     @JsonKey(name: 'status') final String? status,
+    @JsonKey(name: 'timeused') final String? timeused,
   }) = _$SessionModelImpl;
 
   factory _SessionModel.fromJson(Map<String, dynamic> json) =
@@ -296,7 +320,7 @@ abstract class _SessionModel implements SessionModel {
   int? get id;
   @override
   @JsonKey(name: 'table_id')
-  String? get tableId;
+  int? get tableId;
   @override
   @JsonKey(name: 'customer_count')
   int? get customerCount;
@@ -309,6 +333,9 @@ abstract class _SessionModel implements SessionModel {
   @override
   @JsonKey(name: 'status')
   String? get status;
+  @override
+  @JsonKey(name: 'timeused')
+  String? get timeused;
 
   /// Create a copy of SessionModel
   /// with the given fields replaced by the non-null parameter values.

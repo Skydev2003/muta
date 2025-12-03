@@ -14,6 +14,8 @@ _$OrderModelImpl _$$OrderModelImplFromJson(Map<String, dynamic> json) =>
       quantity: (json['quantity'] as num?)?.toInt(),
       price: (json['price'] as num?)?.toInt(),
       createdAt: json['created_at'] as String?,
+      name: json['name'] as String?,
+      image: json['image'] as String?,
     );
 
 Map<String, dynamic> _$$OrderModelImplToJson(_$OrderModelImpl instance) =>
@@ -24,4 +26,6 @@ Map<String, dynamic> _$$OrderModelImplToJson(_$OrderModelImpl instance) =>
       'quantity': instance.quantity,
       'price': instance.price,
       'created_at': instance.createdAt,
+      'name': instance.name,
+      'image': instance.image,
     };

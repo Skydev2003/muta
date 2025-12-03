@@ -23,7 +23,7 @@ class _OpenTableScreenState
 
     if (!mounted) return;
 
-    context.push('/table_detail/${widget.id}');
+    context.go('/table_detail/${widget.id}');
   }
 
   @override

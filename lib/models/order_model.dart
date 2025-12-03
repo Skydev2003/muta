@@ -13,6 +13,8 @@ class OrderModel with _$OrderModel {
   @JsonKey(name: 'quantity') int? quantity,
   @JsonKey(name: 'price') int? price,
   @JsonKey(name: 'created_at') String? createdAt,
+  @JsonKey(name: 'name') String? name,
+  @JsonKey(name: 'image') String? image,
   }) = _OrderModel;
 
   factory OrderModel.fromJson(Map<String, dynamic> json) => _$OrderModelFromJson(json);

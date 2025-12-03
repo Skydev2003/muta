@@ -2,16 +2,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:muta/models/table_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-/// Provider to fetch list of tables
+// ---------------- TABLE STREAM ----------------
 final tableStreamProvider =
     StreamProvider<List<Map<String, dynamic>>>((ref) {
       final supabase = Supabase.instance.client;
       return supabase
           .from('tables')
-          .stream(primaryKey: ['id']);
+          .stream(primaryKey: ['id'])
+          .map((data) => data.cast<Map<String, dynamic>>());
     });
 
-/// Provider to add a new table
+// ---------------- ADD TABLE ----------------
 class AddTableNotifier extends StateNotifier<void> {
   AddTableNotifier() : super(null);
 
@@ -28,7 +29,7 @@ final addTableProvider =
       return AddTableNotifier();
     });
 
-/// Provider to fetch table details by ID
+// ---------------- TABLE DETAIL ----------------
 final tableDetailProvider =
     FutureProvider.family<TableModel, int>((ref, id) async {
       final supabase = Supabase.instance.client;
@@ -38,8 +39,11 @@ final tableDetailProvider =
               .from('tables')
               .select()
               .eq('id', id)
-              .single();
+              .maybeSingle();
+
+      if (data == null) {
+        throw Exception("ไม่พบข้อมูลโต๊ะ ID $id");
+      }
 
       return TableModel.fromJson(data);
     });
-
