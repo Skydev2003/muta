@@ -20,21 +20,44 @@ class TableScreen extends ConsumerWidget {
           "รายการโต๊ะ",
           style: TextStyle(color: Colors.white),
         ),
+        leading: IconButton(
+          onPressed: () {
+            context.go('/'); // กลับหน้า Home
+          },
+          icon: const Icon(
+            Icons.arrow_back,
+            color: Colors.white,
+          ),
+        ),
         actions: [
           IconButton(
-            onPressed: () {},
+            onPressed: () {
+              // ไว้สำหรับเพิ่มโต๊ะในอนาคต
+            },
             icon: const Icon(
-              Icons.add_circle_outline,
+              Icons.add,
               color: Colors.white,
             ),
           ),
         ],
       ),
 
+      // -------------------- BODY --------------------
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: tableStream.when(
           data: (tables) {
+            // 1) ก็อป list มาก่อนกัน side-effect
+            final sorted = [...tables];
+
+            // 2) เรียงตามชื่อโต๊ะ (T01, T02, T03...)
+            sorted.sort((a, b) {
+              return a['name'].toString().compareTo(
+                b['name'].toString(),
+              );
+            });
+
+            // 3) แสดงผลแบบ Grid
             return GridView.builder(
               gridDelegate:
                   const SliverGridDelegateWithFixedCrossAxisCount(
@@ -43,21 +66,43 @@ class TableScreen extends ConsumerWidget {
                     mainAxisSpacing: 16,
                     childAspectRatio: 0.95,
                   ),
-              itemCount: tables.length,
+              itemCount: sorted.length,
               itemBuilder: (context, index) {
-                final t = tables[index];
+                final t = sorted[index];
 
-                final status = t["status"];
-                final name = t["name"] ?? "";
-                final timeLeft = t["time_left"]; // optional
+                final status = t["status"] as String;
+                final name = t["name"] as String? ?? "";
+                final timeLeft =
+                    t["time_left"]; // int? นาที หรือ null
+                final tableId = t["id"] as int;
+
+                // onTap แยกตามสถานะโต๊ะ
+                VoidCallback onTap;
+                if (status == "available") {
+                  // เปิดโต๊ะใหม่
+                  onTap =
+                      () => context.push(
+                        '/openTable/$tableId',
+                      );
+                } else if (status == "dirty") {
+                  // หน้าเคลียร์โต๊ะ
+                  onTap =
+                      () => context.push(
+                        '/cleanTable/$tableId',
+                      );
+                } else {
+                  // using → หน้ารายการอาหารของโต๊ะ
+                  onTap =
+                      () => context.push(
+                        '/table_detail/$tableId',
+                      );
+                }
 
                 return _tableCard(
-                  context,
-                  name,
-                  status,
-                  timeLeft,
-                  () =>
-                      context.push('/openTable/${t["id"]}'),
+                  name: name,
+                  status: status,
+                  timeLeft: timeLeft,
+                  onTap: onTap,
                 );
               },
             );
@@ -83,13 +128,12 @@ class TableScreen extends ConsumerWidget {
   }
 
   // ===================== TABLE CARD =====================
-  Widget _tableCard(
-    BuildContext context,
-    String name,
-    String status,
-    dynamic timeLeft,
-    VoidCallback onTap,
-  ) {
+  Widget _tableCard({
+    required String name,
+    required String status,
+    required dynamic timeLeft,
+    required VoidCallback onTap,
+  }) {
     // ICON CONFIG
     IconData icon;
     Color iconColor;
@@ -111,7 +155,7 @@ class TableScreen extends ConsumerWidget {
         badgeText = "รอทำความสะอาด";
         break;
 
-      default:
+      default: // available
         icon = Icons.restaurant_menu;
         iconColor = Colors.greenAccent;
         badgeColor = Colors.green;
@@ -122,14 +166,14 @@ class TableScreen extends ConsumerWidget {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: const Color(0xFF251832),
+          color: AppTheme.cardDark,
           borderRadius: BorderRadius.circular(16),
         ),
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Top Row
+            // ---------- แถวบน: ชื่อโต๊ะ + ไอคอน ----------
             Row(
               mainAxisAlignment:
                   MainAxisAlignment.spaceBetween,
@@ -148,25 +192,25 @@ class TableScreen extends ConsumerWidget {
 
             const SizedBox(height: 4),
 
-            // Time left (เฉพาะ using)
+            // ---------- เวลาเหลือ (เฉพาะ using) ----------
             if (status == "using" && timeLeft != null)
               Text(
                 "เหลือ $timeLeft นาที",
                 style: const TextStyle(
                   color: Colors.white70,
+                  fontSize: 13,
                 ),
               ),
 
             const Spacer(),
 
-            // STATUS BADGE
+            // ---------- Badge สถานะ ----------
             Container(
               padding: const EdgeInsets.symmetric(
                 horizontal: 10,
                 vertical: 6,
               ),
               decoration: BoxDecoration(
-                color: badgeColor.withOpacity(0.2),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
@@ -174,6 +218,7 @@ class TableScreen extends ConsumerWidget {
                 style: TextStyle(
                   color: badgeColor,
                   fontWeight: FontWeight.bold,
+                  fontSize: 13,
                 ),
               ),
             ),

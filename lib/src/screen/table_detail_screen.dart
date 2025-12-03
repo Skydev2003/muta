@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
 import 'package:muta/models/menu_model.dart';
 import 'package:muta/src/providers/menu_provider.dart';
 import 'package:muta/src/providers/order_provider.dart';
 import 'package:muta/src/providers/session_timer_provider.dart';
+import 'package:muta/src/providers/session_provider.dart';
 
 class TableDetailScreen extends ConsumerStatefulWidget {
   const TableDetailScreen({super.key, required this.id});
@@ -21,9 +23,9 @@ class _TableDetailScreenState
 
   final _categories = [
     "หมู",
+    "เนื้อ",
+    "ทะเล",
     "ผัก",
-    "เครื่องดื่ม",
-    "อื่นๆ",
   ];
 
   @override
@@ -33,26 +35,39 @@ class _TableDetailScreenState
     );
     final menuAsync = ref.watch(menuStreamProvider);
 
-    final cartItems = ref.watch(
-      orderProvider,
-    ); // list<OrderItem>
+    final cartItems = ref.watch(orderProvider);
+
+    // ดึง session ล่าสุดของโต๊ะ
+    final sessionAsync = ref.watch(
+      sessionByTableProvider(widget.id),
+    );
 
     return Scaffold(
       backgroundColor: const Color(0xFF1A1123),
+
+      // -------------------- APP BAR --------------------
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
-        title: Text(
-          timer.maybeWhen(
-            data:
-                (timeLeft) =>
-                    "โต๊ะ ${widget.id} | เวลาคงเหลือ ${timeLeft.inMinutes} นาที",
-            orElse: () => "โต๊ะ ${widget.id}",
-          ),
-          style: const TextStyle(color: Colors.white),
+        title: timer.maybeWhen(
+          data: (session) {
+            final left = session.timeLeft; // Duration?
+            final minutes = left?.inMinutes ?? 0;
+
+            return Text(
+              "โต๊ะ ${widget.id} | เวลาคงเหลือ $minutes นาที",
+              style: const TextStyle(color: Colors.white),
+            );
+          },
+          orElse:
+              () => Text(
+                "โต๊ะ ${widget.id}",
+                style: const TextStyle(color: Colors.white),
+              ),
         ),
       ),
+
       body: Column(
         children: [
           // ---------------- Tab Category ----------------
@@ -127,7 +142,6 @@ class _TableDetailScreenState
                       (_, __) => const SizedBox(height: 12),
                   itemBuilder: (_, index) {
                     final item = filtered[index];
-
                     return _menuItemCard(item);
                   },
                 );
@@ -150,7 +164,7 @@ class _TableDetailScreenState
             ),
           ),
 
-          // ---------------- Cart Button ----------------
+          // ---------------- CART BUTTON ----------------
           if (cartItems.isNotEmpty)
             Padding(
               padding: const EdgeInsets.all(16.0),
@@ -181,6 +195,41 @@ class _TableDetailScreenState
                 ),
               ),
             ),
+
+          // --------------------- ปิดบิล ----------------------
+          sessionAsync.when(
+            data: (session) {
+              if (session == null) {
+                return const SizedBox();
+              }
+              return Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.redAccent,
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 14,
+                      ),
+                    ),
+                    child: const Text(
+                      "ปิดบิล",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    onPressed: () {
+                      context.push('/billing/${widget.id}');
+                    },
+                  ),
+                ),
+              );
+            },
+            loading: () => const SizedBox(),
+            error: (_, __) => const SizedBox(),
+          ),
         ],
       ),
     );

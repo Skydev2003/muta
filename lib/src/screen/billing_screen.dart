@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:muta/src/providers/history_provider.dart';
 import 'package:muta/src/providers/order_provider.dart';
 import 'package:muta/src/providers/session_provider.dart';
 
@@ -187,8 +188,12 @@ class BillingScreen extends ConsumerWidget {
 
                         // 1) save orders
                         await ref
-                            .read(orderProvider.notifier)
-                            .submitOrders(sessionId);
+                            .read(historyAddProvider)
+                            .addHistory(
+                              sessionId: sessionId,
+                              totalPrice: total,
+                              items: orders.length,
+                            );
 
                         // 2) close session
                         await ref
@@ -199,7 +204,7 @@ class BillingScreen extends ConsumerWidget {
                             );
 
                         // 3) back to table screen (clear stack)
-                        context.go('/table');
+                        context.go('/');
                       },
                       child: const Text(
                         "ปิดบิล & เคลียร์โต๊ะ",
@@ -274,7 +279,6 @@ class BillingScreen extends ConsumerWidget {
     );
   }
 
-
   Widget _summaryCard(int total) {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -284,7 +288,10 @@ class BillingScreen extends ConsumerWidget {
       ),
       child: Column(
         children: [
-          _row("ราคารวม", "฿${total.toStringAsFixed(2)}"),
+          _row(
+            "ราคารวม",
+            "฿${(total.toDouble()).toStringAsFixed(2)}",
+          ),
           const SizedBox(height: 6),
           _row("ส่วนลด", "-฿0.00"),
           const Divider(color: Colors.white24, height: 24),

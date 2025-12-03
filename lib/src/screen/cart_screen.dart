@@ -157,10 +157,14 @@ class CartScreen extends ConsumerWidget {
                   ),
                 ),
                 onPressed: () {
-                  context.push( '/billing/$tableId' );
+                  ref
+                      .read(orderProvider.notifier)
+                      .submitOrders(tableId);
+                 ref.context.go('/table');
                 },
                 child: const Text(
-                  "ยืนยันบิล",
+                  "ยืนยันออเดอร์",
+                  
                   style: TextStyle(
                     fontSize: 18,
                     color: Colors.white,

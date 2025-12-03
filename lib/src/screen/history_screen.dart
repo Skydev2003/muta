@@ -1,121 +1,305 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:muta/models/history_model.dart';
 import 'package:muta/src/providers/history_provider.dart';
 
-class HistoryScreen extends ConsumerWidget {
+class HistoryScreen extends ConsumerStatefulWidget {
   const HistoryScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HistoryScreen> createState() =>
+      _HistoryScreenState();
+}
+
+class _HistoryScreenState
+    extends ConsumerState<HistoryScreen> {
+  String filter = "all"; // today, week, month
+  String keyword = "";
+
+  @override
+  Widget build(BuildContext context) {
     final historyAsync = ref.watch(historyProvider);
 
     return Scaffold(
       backgroundColor: const Color(0xFF1A1123),
+
       appBar: AppBar(
         backgroundColor: Colors.transparent,
+        elevation: 0,
         title: const Text(
           "ประวัติ",
           style: TextStyle(color: Colors.white),
         ),
         iconTheme: const IconThemeData(color: Colors.white),
       ),
-      body: historyAsync.when(
-        data: (list) {
-          if (list.isEmpty) {
-            return const Center(
-              child: Text(
-                "ยังไม่มีประวัติ",
-                style: TextStyle(color: Colors.white70),
-              ),
-            );
-          }
 
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: list.length,
-            itemBuilder: (context, index) {
-              final h = list[index];
-
-              final dt = DateTime.parse(h.createdAt!);
-              final dateText =
-                  "${dt.day}/${dt.month}/${dt.year}, ${dt.hour}:${dt.minute.toString().padLeft(2, '0')}";
-
-              return GestureDetector(
-                onTap:
-                    () => context.push(
-                      "/history_detail/${h.id}",
+      body: Column(
+        children: [
+          // ---------------- SEARCH BAR ----------------
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16,
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    style: const TextStyle(
+                      color: Colors.white,
                     ),
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  margin: const EdgeInsets.only(bottom: 14),
+                    onChanged: (v) {
+                      setState(() => keyword = v.trim());
+                    },
+                    decoration: InputDecoration(
+                      hintText: "ค้นหาด้วยชื่อโต๊ะ...",
+                      hintStyle: const TextStyle(
+                        color: Colors.white54,
+                      ),
+                      filled: true,
+                      fillColor: const Color(0xFF251832),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(
+                          14,
+                        ),
+                        borderSide: BorderSide.none,
+                      ),
+                      prefixIcon: const Icon(
+                        Icons.search,
+                        color: Colors.white70,
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(width: 12),
+
+                // Calendar Button
+                Container(
                   decoration: BoxDecoration(
                     color: const Color(0xFF251832),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(14),
                   ),
-                  child: Row(
-                    children: [
-                      // LEFT SIDE
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment:
-                              CrossAxisAlignment.start,
+                  child: IconButton(
+                    onPressed: () {},
+                    icon: const Icon(
+                      Icons.calendar_month,
+                      color: Colors.white70,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 14),
+
+          // ---------------- FILTER BUTTONS ----------------
+          SizedBox(
+            height: 40,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16,
+              ),
+              children: [
+                _filterChip("ทั้งหมด", "all"),
+                _filterChip("วันนี้", "today"),
+                _filterChip("สัปดาห์นี้", "week"),
+                _filterChip("เดือนนี้", "month"),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 12),
+
+          // ---------------- LIST ----------------
+          Expanded(
+            child: historyAsync.when(
+              data: (list) {
+                // FILTER BY KEYWORD
+                var result =
+                    list.where((h) {
+                      if (keyword.isEmpty) return true;
+                      return h.sessionId!
+                          .toLowerCase()
+                          .contains(keyword.toLowerCase());
+                    }).toList();
+
+                // FILTER BY DATE
+                result = _applyDateFilter(result);
+
+                if (result.isEmpty) {
+                  return const Center(
+                    child: Text(
+                      "ยังไม่มีประวัติ",
+                      style: TextStyle(
+                        color: Colors.white70,
+                      ),
+                    ),
+                  );
+                }
+
+                return ListView.builder(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  itemCount: result.length,
+                  itemBuilder: (context, index) {
+                    final h = result[index];
+                    final dt = DateTime.parse(h.createdAt!);
+
+                    final dateText =
+                        "${dt.day}/${dt.month}/${dt.year}, ${dt.hour}:${dt.minute.toString().padLeft(2, "0")}";
+
+                    return GestureDetector(
+                      onTap:
+                          () => context.push(
+                            "/history_detail/${h.id}",
+                          ),
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        margin: const EdgeInsets.only(
+                          bottom: 14,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF251832),
+                          borderRadius:
+                              BorderRadius.circular(12),
+                        ),
+                        child: Row(
                           children: [
+                            // LEFT
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment:
+                                    CrossAxisAlignment
+                                        .start,
+                                children: [
+                                  Text(
+                                    "โต๊ะ ${h.sessionId}",
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 17,
+                                      fontWeight:
+                                          FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    dateText,
+                                    style: const TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            // RIGHT
                             Text(
-                              "โต๊ะ ${h.sessionId}",
+                              "${h.totalPrice} ฿",
                               style: const TextStyle(
                                 color: Colors.white,
-                                fontSize: 16,
+                                fontSize: 18,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            const SizedBox(height: 6),
-                            Text(
-                              dateText,
-                              style: const TextStyle(
-                                color: Colors.white70,
-                                fontSize: 13,
-                              ),
+
+                            const SizedBox(width: 10),
+
+                            const Icon(
+                              Icons.chevron_right,
+                              color: Colors.white70,
                             ),
                           ],
                         ),
                       ),
+                    );
+                  },
+                );
+              },
 
-                      // RIGHT SIDE
-                      Text(
-                        "${h.totalPrice} ฿",
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      const Icon(
-                        Icons.chevron_right,
-                        color: Colors.white70,
-                      ),
-                    ],
+              loading:
+                  () => const Center(
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                    ),
                   ),
-                ),
-              );
-            },
-          );
-        },
-        loading:
-            () => const Center(
-              child: CircularProgressIndicator(
-                color: Colors.white,
-              ),
+
+              error:
+                  (e, st) => Center(
+                    child: Text(
+                      "$e",
+                      style: const TextStyle(
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
             ),
-        error:
-            (e, st) => Center(
-              child: Text(
-                "$e",
-                style: const TextStyle(color: Colors.white),
-              ),
-            ),
+          ),
+        ],
       ),
     );
+  }
+
+  // ---------------- FILTER CHIP ----------------
+  Widget _filterChip(String label, String value) {
+    final isSelected = filter == value;
+
+    return Padding(
+      padding: const EdgeInsets.only(right: 10),
+      child: ChoiceChip(
+        label: Text(
+          label,
+          style: TextStyle(
+            color:
+                isSelected ? Colors.white : Colors.white70,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        selected: isSelected,
+        selectedColor: Colors.purple,
+        backgroundColor: const Color(0xFF251832),
+        onSelected: (_) {
+          setState(() => filter = value);
+        },
+      ),
+    );
+  }
+
+  // ---------------- DATE FILTER LOGIC ----------------
+  List<HistoryModel> _applyDateFilter(
+    List<HistoryModel> list,
+  ) {
+    if (filter == "all") return list;
+
+    final now = DateTime.now();
+
+    return list.where((h) {
+      final d = DateTime.parse(h.createdAt!);
+
+      if (filter == "today") {
+        return d.year == now.year &&
+            d.month == now.month &&
+            d.day == now.day;
+      }
+
+      if (filter == "week") {
+        return d.isAfter(
+          now.subtract(const Duration(days: 7)),
+        );
+      }
+
+      if (filter == "month") {
+        return d.isAfter(
+          now.subtract(const Duration(days: 30)),
+        );
+      }
+
+      return true;
+    }).toList();
   }
 }

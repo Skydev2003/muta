@@ -1,5 +1,6 @@
 
 import 'package:go_router/go_router.dart';
+import 'package:muta/src/screen/clean_table_screen.dart';
 
 // ===== Screens =====
 import 'package:muta/src/screen/home_screen.dart';
@@ -64,6 +65,14 @@ final router = GoRouter(
     GoRoute(
       path: '/history',
       builder: (context, state) => const HistoryScreen(),
+    ),
+    // -------- CLEAN TABLE --------
+    GoRoute(
+      path: '/cleanTable/:id',
+      builder: (context, state) {
+        final id = int.parse(state.pathParameters['id']!);
+        return CleanTableScreen(tableId: id);
+      },
     ),
   ],
 );

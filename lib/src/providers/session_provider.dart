@@ -2,7 +2,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:muta/models/session_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-// ดึง session ล่าสุดของโต๊ะที่กำลังใช้งาน
+/// เวลาให้แต่ละโต๊ะ = 90 นาที
+const Duration totalDuration = Duration(minutes: 100);
+
 final sessionByTableProvider = FutureProvider.family<
   SessionModel,
   int
@@ -25,26 +27,35 @@ final sessionByTableProvider = FutureProvider.family<
 
   final session = SessionModel.fromJson(response);
 
-  // คำนวณเวลาที่ใช้งาน (แบบ 1:32:45)
-  if (session.startTime != null) {
-    final start = DateTime.tryParse(session.startTime!);
-    if (start != null) {
-      final diff = DateTime.now().difference(start);
-      final hh = diff.inHours.toString().padLeft(2, '0');
-      final mm = (diff.inMinutes % 60).toString().padLeft(
-        2,
-        '0',
-      );
-      final ss = (diff.inSeconds % 60).toString().padLeft(
-        2,
-        '0',
-      );
+  // ใช้ end_time ในการคำนวณเวลาคงเหลือ
+  if (session.endTime != null) {
+    final endUtc = DateTime.parse(session.endTime!).toUtc();
+    final nowUtc = DateTime.now().toUtc();
 
-      return session.copyWith(timeused: "$hh:$mm:$ss");
-    }
+    final remaining = endUtc.difference(nowUtc);
+
+    return session.copyWith(
+      timeLeft:
+          remaining.isNegative ? Duration.zero : remaining,
+    );
   }
 
-  return session;
+  // fallback ถ้าไม่มี end_time
+  if (session.startTime != null) {
+    final startUtc =
+        DateTime.parse(session.startTime!).toUtc();
+    final nowUtc = DateTime.now().toUtc();
+
+    final used = nowUtc.difference(startUtc);
+    final remaining = totalDuration - used;
+
+    return session.copyWith(
+      timeLeft:
+          remaining.isNegative ? Duration.zero : remaining,
+    );
+  }
+
+  return session.copyWith(timeLeft: Duration.zero);
 });
 
 class SessionController extends StateNotifier<bool> {
@@ -52,7 +63,6 @@ class SessionController extends StateNotifier<bool> {
 
   final Ref ref;
 
-  // ปิด session โต๊ะ
   Future<void> finishSession(
     int tableId,
     int sessionId,
@@ -68,12 +78,13 @@ class SessionController extends StateNotifier<bool> {
         })
         .eq('id', sessionId);
 
-    // 2) เปลี่ยนสถานะโต๊ะ = dirty
+    // 2) อัปเดตสถานะโต๊ะ → dirty
     await client
         .from('tables')
         .update({'status': 'dirty'})
         .eq('id', tableId);
 
+    // 3) แจ้ง UI ว่าทำสำเร็จ
     state = true;
   }
 }
