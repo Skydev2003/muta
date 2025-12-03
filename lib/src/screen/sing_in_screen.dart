@@ -124,7 +124,7 @@ class _SignInScreenState extends State<SignInScreen> {
                       50,
                     ),
                   ),
-                  onPressed: () => context.push('/sign-up'),
+                  onPressed: () => context.push('/signup'),
                   child: const Text(
                     "สร้างบัญชีใหม่",
                     style: TextStyle(
