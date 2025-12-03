@@ -24,7 +24,7 @@ mixin _$HistoryModel {
   @JsonKey(name: 'id')
   int? get id => throw _privateConstructorUsedError;
   @JsonKey(name: 'session_id')
-  String? get sessionId => throw _privateConstructorUsedError;
+  int? get sessionId => throw _privateConstructorUsedError;
   @JsonKey(name: 'total_price')
   int? get totalPrice => throw _privateConstructorUsedError;
   @JsonKey(name: 'items')
@@ -51,7 +51,7 @@ abstract class $HistoryModelCopyWith<$Res> {
   @useResult
   $Res call({
     @JsonKey(name: 'id') int? id,
-    @JsonKey(name: 'session_id') String? sessionId,
+    @JsonKey(name: 'session_id') int? sessionId,
     @JsonKey(name: 'total_price') int? totalPrice,
     @JsonKey(name: 'items') int? items,
     @JsonKey(name: 'created_at') String? createdAt,
@@ -90,7 +90,7 @@ class _$HistoryModelCopyWithImpl<$Res, $Val extends HistoryModel>
                 freezed == sessionId
                     ? _value.sessionId
                     : sessionId // ignore: cast_nullable_to_non_nullable
-                        as String?,
+                        as int?,
             totalPrice:
                 freezed == totalPrice
                     ? _value.totalPrice
@@ -123,7 +123,7 @@ abstract class _$$HistoryModelImplCopyWith<$Res>
   @useResult
   $Res call({
     @JsonKey(name: 'id') int? id,
-    @JsonKey(name: 'session_id') String? sessionId,
+    @JsonKey(name: 'session_id') int? sessionId,
     @JsonKey(name: 'total_price') int? totalPrice,
     @JsonKey(name: 'items') int? items,
     @JsonKey(name: 'created_at') String? createdAt,
@@ -161,7 +161,7 @@ class __$$HistoryModelImplCopyWithImpl<$Res>
             freezed == sessionId
                 ? _value.sessionId
                 : sessionId // ignore: cast_nullable_to_non_nullable
-                    as String?,
+                    as int?,
         totalPrice:
             freezed == totalPrice
                 ? _value.totalPrice
@@ -201,7 +201,7 @@ class _$HistoryModelImpl implements _HistoryModel {
   final int? id;
   @override
   @JsonKey(name: 'session_id')
-  final String? sessionId;
+  final int? sessionId;
   @override
   @JsonKey(name: 'total_price')
   final int? totalPrice;
@@ -254,7 +254,7 @@ class _$HistoryModelImpl implements _HistoryModel {
 abstract class _HistoryModel implements HistoryModel {
   const factory _HistoryModel({
     @JsonKey(name: 'id') final int? id,
-    @JsonKey(name: 'session_id') final String? sessionId,
+    @JsonKey(name: 'session_id') final int? sessionId,
     @JsonKey(name: 'total_price') final int? totalPrice,
     @JsonKey(name: 'items') final int? items,
     @JsonKey(name: 'created_at') final String? createdAt,
@@ -268,7 +268,7 @@ abstract class _HistoryModel implements HistoryModel {
   int? get id;
   @override
   @JsonKey(name: 'session_id')
-  String? get sessionId;
+  int? get sessionId;
   @override
   @JsonKey(name: 'total_price')
   int? get totalPrice;

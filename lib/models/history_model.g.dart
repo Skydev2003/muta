@@ -9,7 +9,7 @@ part of 'history_model.dart';
 _$HistoryModelImpl _$$HistoryModelImplFromJson(Map<String, dynamic> json) =>
     _$HistoryModelImpl(
       id: (json['id'] as num?)?.toInt(),
-      sessionId: json['session_id'] as String?,
+      sessionId: (json['session_id'] as num?)?.toInt(),
       totalPrice: (json['total_price'] as num?)?.toInt(),
       items: (json['items'] as num?)?.toInt(),
       createdAt: json['created_at'] as String?,

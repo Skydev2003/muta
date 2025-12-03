@@ -3,60 +3,49 @@ import 'package:muta/models/session_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// เวลาให้แต่ละโต๊ะ = 90 นาที
-const Duration totalDuration = Duration(minutes: 100);
+const Duration totalDuration = Duration(minutes: 90);
 
-final sessionByTableProvider = FutureProvider.family<
-  SessionModel,
-  int
->((ref, tableId) async {
-  final supabase = Supabase.instance.client;
+final sessionByTableProvider =
+    FutureProvider.family<SessionModel, int>((
+      ref,
+      tableId,
+    ) async {
+      final supabase = Supabase.instance.client;
 
-  final response =
-      await supabase
-          .from('table_sessions')
-          .select()
-          .eq('table_id', tableId)
-          .eq('status', 'using')
-          .order('id', ascending: false)
-          .limit(1)
-          .maybeSingle();
+      final response =
+          await supabase
+              .from('table_sessions')
+              .select()
+              .eq('table_id', tableId)
+              .eq('status', 'using')
+              .order('id', ascending: false)
+              .limit(1)
+              .maybeSingle();
 
-  if (response == null) {
-    throw "ไม่พบ Session ของโต๊ะนี้";
-  }
+      if (response == null) throw "ไม่พบ Session";
 
-  final session = SessionModel.fromJson(response);
+      final session = SessionModel.fromJson(response);
 
-  // ใช้ end_time ในการคำนวณเวลาคงเหลือ
-  if (session.endTime != null) {
-    final endUtc = DateTime.parse(session.endTime!).toUtc();
-    final nowUtc = DateTime.now().toUtc();
+      // 🟣 คำนวณ timeused (00:00:00)
+      if (session.startTime != null) {
+        final start = DateTime.parse(session.startTime!);
+        final diff = DateTime.now().difference(start);
 
-    final remaining = endUtc.difference(nowUtc);
+        final hh = diff.inHours.toString().padLeft(2, '0');
+        final mm = (diff.inMinutes % 60).toString().padLeft(
+          2,
+          '0',
+        );
+        final ss = (diff.inSeconds % 60).toString().padLeft(
+          2,
+          '0',
+        );
 
-    return session.copyWith(
-      timeLeft:
-          remaining.isNegative ? Duration.zero : remaining,
-    );
-  }
+        return session.copyWith(timeused: "$hh:$mm:$ss");
+      }
 
-  // fallback ถ้าไม่มี end_time
-  if (session.startTime != null) {
-    final startUtc =
-        DateTime.parse(session.startTime!).toUtc();
-    final nowUtc = DateTime.now().toUtc();
-
-    final used = nowUtc.difference(startUtc);
-    final remaining = totalDuration - used;
-
-    return session.copyWith(
-      timeLeft:
-          remaining.isNegative ? Duration.zero : remaining,
-    );
-  }
-
-  return session.copyWith(timeLeft: Duration.zero);
-});
+      return session;
+    });
 
 class SessionController extends StateNotifier<bool> {
   SessionController(this.ref) : super(false);

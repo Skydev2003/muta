@@ -8,7 +8,7 @@ part 'history_model.g.dart';
 class HistoryModel with _$HistoryModel {
   const factory HistoryModel({
   @JsonKey(name: 'id') int? id,
-  @JsonKey(name: 'session_id') String? sessionId,
+  @JsonKey(name: 'session_id') int? sessionId,
   @JsonKey(name: 'total_price') int? totalPrice,
   @JsonKey(name: 'items') int? items,
   @JsonKey(name: 'created_at') String? createdAt,

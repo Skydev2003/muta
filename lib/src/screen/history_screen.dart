@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:muta/models/history_model.dart';
 import 'package:muta/src/providers/history_provider.dart';
+import 'package:muta/src/services/logger.dart';
 
 class HistoryScreen extends ConsumerStatefulWidget {
   const HistoryScreen({super.key});
@@ -14,13 +15,14 @@ class HistoryScreen extends ConsumerStatefulWidget {
 
 class _HistoryScreenState
     extends ConsumerState<HistoryScreen> {
-  String filter = "all"; // today, week, month
+  String filter = "all"; // today | week | month
   String keyword = "";
 
   @override
   Widget build(BuildContext context) {
     final historyAsync = ref.watch(historyProvider);
-
+   logger.i('open history screen');
+   logger.d(historyAsync);
     return Scaffold(
       backgroundColor: const Color(0xFF1A1123),
 
@@ -36,7 +38,7 @@ class _HistoryScreenState
 
       body: Column(
         children: [
-          // ---------------- SEARCH BAR ----------------
+          // ---------------- SEARCH ----------------
           Padding(
             padding: const EdgeInsets.symmetric(
               horizontal: 16,
@@ -48,11 +50,12 @@ class _HistoryScreenState
                     style: const TextStyle(
                       color: Colors.white,
                     ),
-                    onChanged: (v) {
-                      setState(() => keyword = v.trim());
-                    },
+                    onChanged:
+                        (v) => setState(
+                          () => keyword = v.trim(),
+                        ),
                     decoration: InputDecoration(
-                      hintText: "ค้นหาด้วยชื่อโต๊ะ...",
+                      hintText: "ค้นหาด้วยหมายเลขโต๊ะ...",
                       hintStyle: const TextStyle(
                         color: Colors.white54,
                       ),
@@ -71,10 +74,8 @@ class _HistoryScreenState
                     ),
                   ),
                 ),
-
                 const SizedBox(width: 12),
 
-                // Calendar Button
                 Container(
                   decoration: BoxDecoration(
                     color: const Color(0xFF251832),
@@ -94,7 +95,7 @@ class _HistoryScreenState
 
           const SizedBox(height: 14),
 
-          // ---------------- FILTER BUTTONS ----------------
+          // ---------------- FILTER ----------------
           SizedBox(
             height: 40,
             child: ListView(
@@ -117,22 +118,24 @@ class _HistoryScreenState
           Expanded(
             child: historyAsync.when(
               data: (list) {
-                // FILTER BY KEYWORD
+                
+                // 1) filter keyword
                 var result =
                     list.where((h) {
                       if (keyword.isEmpty) return true;
-                      return h.sessionId!
-                          .toLowerCase()
-                          .contains(keyword.toLowerCase());
+
+                      return h.sessionId
+                          .toString()
+                          .contains(keyword);
                     }).toList();
 
-                // FILTER BY DATE
+                // 2) filter by date
                 result = _applyDateFilter(result);
 
                 if (result.isEmpty) {
                   return const Center(
                     child: Text(
-                      "ยังไม่มีประวัติ",
+                      "ไม่พบประวัติ",
                       style: TextStyle(
                         color: Colors.white70,
                       ),
@@ -148,10 +151,18 @@ class _HistoryScreenState
                   itemCount: result.length,
                   itemBuilder: (context, index) {
                     final h = result[index];
-                    final dt = DateTime.parse(h.createdAt!);
+
+                    if (h.createdAt == null) {
+                      return const SizedBox();
+                    }
+
+                    final dt =
+                        DateTime.tryParse(h.createdAt!) ??
+                        DateTime.now();
 
                     final dateText =
-                        "${dt.day}/${dt.month}/${dt.year}, ${dt.hour}:${dt.minute.toString().padLeft(2, "0")}";
+                        "${dt.day}/${dt.month}/${dt.year}, "
+                        "${dt.hour}:${dt.minute.toString().padLeft(2, "0")}";
 
                     return GestureDetector(
                       onTap:
@@ -207,9 +218,7 @@ class _HistoryScreenState
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-
                             const SizedBox(width: 10),
-
                             const Icon(
                               Icons.chevron_right,
                               color: Colors.white70,
@@ -221,14 +230,12 @@ class _HistoryScreenState
                   },
                 );
               },
-
               loading:
                   () => const Center(
                     child: CircularProgressIndicator(
                       color: Colors.white,
                     ),
                   ),
-
               error:
                   (e, st) => Center(
                     child: Text(
@@ -263,9 +270,7 @@ class _HistoryScreenState
         selected: isSelected,
         selectedColor: Colors.purple,
         backgroundColor: const Color(0xFF251832),
-        onSelected: (_) {
-          setState(() => filter = value);
-        },
+        onSelected: (_) => setState(() => filter = value),
       ),
     );
   }
@@ -279,7 +284,9 @@ class _HistoryScreenState
     final now = DateTime.now();
 
     return list.where((h) {
-      final d = DateTime.parse(h.createdAt!);
+      if (h.createdAt == null) return false;
+
+      final d = DateTime.tryParse(h.createdAt!) ?? now;
 
       if (filter == "today") {
         return d.year == now.year &&

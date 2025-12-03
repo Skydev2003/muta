@@ -47,6 +47,7 @@ class TableScreen extends ConsumerWidget {
         padding: const EdgeInsets.all(16.0),
         child: tableStream.when(
           data: (tables) {
+            
             // 1) ก็อป list มาก่อนกัน side-effect
             final sorted = [...tables];
 
