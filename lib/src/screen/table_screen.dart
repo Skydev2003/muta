@@ -9,60 +9,176 @@ class TableScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final table = ref.watch(tableStreamProvider);
+    final tableStream = ref.watch(tableStreamProvider);
 
     return Scaffold(
+      backgroundColor: AppTheme.bgDark,
       appBar: AppBar(
         backgroundColor: AppTheme.bgDark,
-        title: Text('Table Screen'),
+        elevation: 0,
+        title: const Text(
+          "รายการโต๊ะ",
+          style: TextStyle(color: Colors.white),
+        ),
         actions: [
           IconButton(
             onPressed: () {},
-            icon: Icon(Icons.add_circle_outlined),
+            icon: const Icon(
+              Icons.add_circle_outline,
+              color: Colors.white,
+            ),
           ),
         ],
       ),
-      body: table.when(
-        data: (tables) {
-          return GridView.builder(
-            gridDelegate:
-                SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 10,
-                  mainAxisSpacing: 10,
-                  childAspectRatio: 1.0,
-                ),
-            itemCount: tables.length,
-            itemBuilder: (context, index) {
-              final table = tables[index];
-              return InkWell(
-                onTap: () {
-                  ref.context.push(
-                    '/openTable/${table['id']}',
-                  );
-                },
 
-                child: Card(
-                  child: Column(
-                    mainAxisAlignment:
-                        MainAxisAlignment.start,
-                    children: [
-                      Text('${table['name']}'),
-                      Text('${table['status']}'),
-                    ],
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: tableStream.when(
+          data: (tables) {
+            return GridView.builder(
+              gridDelegate:
+                  const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                    childAspectRatio: 0.95,
+                  ),
+              itemCount: tables.length,
+              itemBuilder: (context, index) {
+                final t = tables[index];
+
+                final status = t["status"];
+                final name = t["name"] ?? "";
+                final timeLeft = t["time_left"]; // optional
+
+                return _tableCard(
+                  context,
+                  name,
+                  status,
+                  timeLeft,
+                  () =>
+                      context.push('/openTable/${t["id"]}'),
+                );
+              },
+            );
+          },
+          loading:
+              () => const Center(
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                ),
+              ),
+          error:
+              (e, st) => Center(
+                child: Text(
+                  "Error: $e",
+                  style: const TextStyle(
+                    color: Colors.white,
                   ),
                 ),
-              );
-            },
-          );
-        },
-        loading:
-            () => const Center(
-              child: CircularProgressIndicator(),
+              ),
+        ),
+      ),
+    );
+  }
+
+  // ===================== TABLE CARD =====================
+  Widget _tableCard(
+    BuildContext context,
+    String name,
+    String status,
+    dynamic timeLeft,
+    VoidCallback onTap,
+  ) {
+    // ICON CONFIG
+    IconData icon;
+    Color iconColor;
+    Color badgeColor;
+    String badgeText;
+
+    switch (status) {
+      case "using":
+        icon = Icons.hourglass_bottom;
+        iconColor = Colors.orangeAccent;
+        badgeColor = Colors.orange;
+        badgeText = "ใช้งานอยู่";
+        break;
+
+      case "dirty":
+        icon = Icons.cleaning_services;
+        iconColor = Colors.redAccent;
+        badgeColor = Colors.red;
+        badgeText = "รอทำความสะอาด";
+        break;
+
+      default:
+        icon = Icons.restaurant_menu;
+        iconColor = Colors.greenAccent;
+        badgeColor = Colors.green;
+        badgeText = "พร้อมใช้งาน";
+    }
+
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFF251832),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Top Row
+            Row(
+              mainAxisAlignment:
+                  MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  name,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Icon(icon, color: iconColor, size: 26),
+              ],
             ),
-        error:
-            (error, stack) =>
-                Center(child: Text('Error: $error')),
+
+            const SizedBox(height: 4),
+
+            // Time left (เฉพาะ using)
+            if (status == "using" && timeLeft != null)
+              Text(
+                "เหลือ $timeLeft นาที",
+                style: const TextStyle(
+                  color: Colors.white70,
+                ),
+              ),
+
+            const Spacer(),
+
+            // STATUS BADGE
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 10,
+                vertical: 6,
+              ),
+              decoration: BoxDecoration(
+                color: badgeColor.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                badgeText,
+                style: TextStyle(
+                  color: badgeColor,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
