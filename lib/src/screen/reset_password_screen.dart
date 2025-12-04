@@ -23,14 +23,12 @@ class _ResetPasswordScreenState
   @override
   void initState() {
     super.initState();
-    print('🔐 ResetPasswordScreen: token=${widget.token}');
   }
 
   Future<void> _updatePassword() async {
     final pwd = newPassword.text.trim();
     final confirm = confirmPassword.text.trim();
 
-    // ✅ Validation
     if (pwd.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -66,13 +64,17 @@ class _ResetPasswordScreenState
     final state = ref.read(authControllerProvider);
 
     state.when(
-      data: (_) {
+      data: (_) async {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text("อัปเดตรหัสผ่านสำเร็จ"),
           ),
         );
-        // Navigate to login
+
+        // 🔥 ต้อง logout ไม่งั้นจะ redirect ไปหน้า Home
+        await auth.signOut();
+
+        // ไปหน้า Login
         context.go('/login');
       },
       error: (e, _) {
@@ -83,6 +85,7 @@ class _ResetPasswordScreenState
       loading: () {},
     );
   }
+
 
   @override
   Widget build(BuildContext context) {

@@ -14,6 +14,7 @@ import 'package:muta/src/screen/table_detail_screen.dart';
 import 'package:muta/src/screen/table_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+/// ใช้สำหรับ refresh UI เมื่อ Auth เปลี่ยนสถานะ
 final _authRefreshNotifier = ValueNotifier<bool>(false);
 
 void initAuthStateListener() {
@@ -26,64 +27,39 @@ void initAuthStateListener() {
 }
 
 final router = GoRouter(
-
   initialLocation: '/login',
-  debugLogDiagnostics: true,
   refreshListenable: _authRefreshNotifier,
+
   redirect: (context, state) {
     final user = Supabase.instance.client.auth.currentUser;
     final location = state.matchedLocation;
-    final fullUri = state.uri;
-    final queryParams = fullUri.queryParametersAll;
+    final uri = state.uri;
 
-    print('🔀 Redirect Debug:');
-    print('  - location: $location');
-    print('  - uri.path: ${fullUri.path}');
-    print('  - uri.host: ${fullUri.host}');
-    print('  - uri.scheme: ${fullUri.scheme}');
-    print('  - query params: $queryParams');
-    print('  - user: ${user?.id}');
+    // ถ้ามี code/token = ลิงก์ reset password
+    final code = uri.queryParameters['code'];
+    final token = uri.queryParameters['token'];
 
-    // Check for reset-password in the URI path or host (from deep link)
-    final isResetPasswordDeepLink = fullUri.host == 'reset-password' ||
-        fullUri.path.contains('reset-password');
-
-    // Always allow reset-password, regardless of auth state
-    if (location.startsWith('/reset-password') || isResetPasswordDeepLink) {
-      print('✅ Allowing reset-password (location or deep link detected)');
-      // If this is a deep link, ensure it gets routed to /reset-password
-      if (isResetPasswordDeepLink && !location.startsWith('/reset-password')) {
-        final code = queryParams['code']?.first;
-        print('🔗 Routing deep link to /reset-password with code=$code');
-        return '/reset-password${fullUri.query.isEmpty ? '' : '?${fullUri.query}'}';
-      }
-      return null;
+    if (code != null || token != null) {
+      return '/reset-password?${uri.query}';
     }
 
-    // Check if we have a code parameter and route to reset-password
-    if (queryParams.containsKey('code') && fullUri.scheme == 'io.supabase.muta') {
-      print('🔗 Deep link with code detected, routing to /reset-password');
-      return '/reset-password${fullUri.query.isEmpty ? '' : '?${fullUri.query}'}';
-    }
-
-    // Allow these pages without authentication
+    // หน้าที่เข้าได้โดยไม่ต้องล็อกอิน
     final isAuthPage =
         location == '/login' ||
         location == '/signup' ||
-        location == '/forgot';
+        location == '/forgot' ||
+        location.startsWith('/reset-password');
 
     if (user == null) {
-      print('❌ No user, isAuthPage=$isAuthPage');
       return isAuthPage ? null : '/login';
     }
 
-    // If user is logged in and tries to access auth pages, redirect to home
-    if (isAuthPage) {
-      print('✅ User logged in on auth page, redirecting to /');
+    // ถ้าล็อกอินแล้ว ห้ามกลับไปหน้า login/signup/forgot
+    if (isAuthPage &&
+        !location.startsWith('/reset-password')) {
       return '/';
     }
 
-    print('✅ User logged in, allowing normal routing');
     return null;
   },
 
@@ -100,6 +76,7 @@ final router = GoRouter(
       path: '/forgot',
       builder: (_, __) => const ForgotPasswordScreen(),
     ),
+
     GoRoute(
       path: '/reset-password',
       builder: (_, state) {
@@ -108,6 +85,7 @@ final router = GoRouter(
         return ResetPasswordScreen(token: token ?? code);
       },
     ),
+
     GoRoute(
       path: '/',
       builder: (_, __) => const HomeScreen(),
@@ -116,44 +94,50 @@ final router = GoRouter(
       path: '/table',
       builder: (_, __) => const TableScreen(),
     ),
+
     GoRoute(
       path: '/openTable/:id',
-      builder: (context, state) {
-        final id = int.parse(state.pathParameters['id']!);
-        return OpenTableScreen(id: id);
-      },
+      builder:
+          (_, state) => OpenTableScreen(
+            id: int.parse(state.pathParameters['id']!),
+          ),
     ),
+
     GoRoute(
       path: '/table_detail/:id',
-      builder: (context, state) {
-        final id = int.parse(state.pathParameters['id']!);
-        return TableDetailScreen(id: id);
-      },
+      builder:
+          (_, state) => TableDetailScreen(
+            id: int.parse(state.pathParameters['id']!),
+          ),
     ),
+
     GoRoute(
       path: '/cart/:id',
-      builder: (_, state) {
-        final id = int.parse(state.pathParameters['id']!);
-        return CartScreen(tableId: id);
-      },
+      builder:
+          (_, state) => CartScreen(
+            tableId: int.parse(state.pathParameters['id']!),
+          ),
     ),
+
     GoRoute(
       path: '/billing/:id',
-      builder: (_, state) {
-        final id = int.parse(state.pathParameters['id']!);
-        return BillingScreen(tableId: id);
-      },
+      builder:
+          (_, state) => BillingScreen(
+            tableId: int.parse(state.pathParameters['id']!),
+          ),
     ),
+
     GoRoute(
       path: '/history',
       builder: (_, __) => const HistoryScreen(),
     ),
+
     GoRoute(
       path: '/cleanTable/:id',
-      builder: (_, state) {
-        final id = int.parse(state.pathParameters['id']!);
-        return CleanTableScreen(tableId: id);
-      },
+      builder:
+          (_, state) => CleanTableScreen(
+            tableId: int.parse(state.pathParameters['id']!),
+          ),
     ),
   ],
 );
