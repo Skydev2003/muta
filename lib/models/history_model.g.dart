@@ -16,6 +16,7 @@ _$HistoryModelImpl _$$HistoryModelImplFromJson(Map<String, dynamic> json) =>
       tableName: json['table_name'] as String?,
       userId: json['user_id'] as String?,
       userEmail: json['user_email'] as String?,
+      userName: json['user_name'] as String?,
     );
 
 Map<String, dynamic> _$$HistoryModelImplToJson(_$HistoryModelImpl instance) =>
@@ -28,4 +29,5 @@ Map<String, dynamic> _$$HistoryModelImplToJson(_$HistoryModelImpl instance) =>
       'table_name': instance.tableName,
       'user_id': instance.userId,
       'user_email': instance.userEmail,
+      'user_name': instance.userName,
     };

@@ -39,18 +39,38 @@ class HistoryRepository {
   }) async {
     final supabase = Supabase.instance.client;
 
-    // ดึงข้อมูล user ที่ล็อกอินอยู่
+    // ข้อมูล user ที่ล็อกอินอยู่
     final user = supabase.auth.currentUser;
 
     await supabase.from('history').insert({
       'session_id': sessionId,
       'total_price': totalPrice,
       'items': items,
-      'table_name': tableName,
+      'table_name': "T${tableName.replaceAll('T', '').padLeft(2, '0')}",
 
-      // 🟣 เพิ่ม 2 ค่านี้
+      // 🟣 บันทึกข้อมูลพนักงานให้ครบ
       'user_id': user?.id,
       'user_email': user?.email,
+      'user_name':
+          user?.userMetadata?['username'], // ⬅ สำคัญ !!
     });
   }
 }
+
+
+//history detail 
+final historyDetailProvider = FutureProvider.family<HistoryModel, int>(
+  (ref, historyId) async {
+    final supabase = Supabase.instance.client;
+
+    final response = await supabase
+        .from('history')
+        .select()
+        .eq('id', historyId)
+        .single();
+
+    return HistoryModel.fromJson(response);
+  },
+);
+
+ 

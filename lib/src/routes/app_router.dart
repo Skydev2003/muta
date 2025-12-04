@@ -4,6 +4,7 @@ import 'package:muta/src/screen/billing_screen.dart';
 import 'package:muta/src/screen/cart_screen.dart';
 import 'package:muta/src/screen/clean_table_screen.dart';
 import 'package:muta/src/screen/forgot_screen.dart';
+import 'package:muta/src/screen/history_detail_screen.dart';
 import 'package:muta/src/screen/history_screen.dart';
 import 'package:muta/src/screen/home_screen.dart';
 import 'package:muta/src/screen/opentable_screen.dart';
@@ -131,7 +132,13 @@ final router = GoRouter(
       path: '/history',
       builder: (_, __) => const HistoryScreen(),
     ),
-
+    GoRoute(
+      path: '/history_detail/:id',
+      builder:
+          (_, state) => HistoryDetailScreen(
+            id: int.parse(state.pathParameters['id']!),
+          ),
+    ),
     GoRoute(
       path: '/cleanTable/:id',
       builder:

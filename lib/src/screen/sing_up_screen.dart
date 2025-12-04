@@ -34,17 +34,18 @@ class _SignUpScreenState
     await auth.signUp(
       email: email.text.trim(),
       password: password.text.trim(),
+      username:
+          username.text.trim(), // ✔ ส่ง username ไปด้วย
     );
 
     final state = ref.read(authControllerProvider);
 
     state.when(
       data: (_) async {
-        // 1) บังคับ logout หลังสมัครสมาชิก
-        await auth.signOut();
+        await auth.signOut(); // บังคับออก
 
-        // 2) แจ้งเตือนผู้ใช้
         if (!mounted) return;
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(
@@ -53,7 +54,6 @@ class _SignUpScreenState
           ),
         );
 
-        // 3) กลับหน้า login แบบไม่มีปัญหา redirect
         context.go('/login');
       },
       error: (e, _) {
@@ -64,7 +64,6 @@ class _SignUpScreenState
       loading: () {},
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -85,7 +84,6 @@ class _SignUpScreenState
                   color: Colors.white70,
                 ),
                 const SizedBox(height: 10),
-
                 const Text(
                   "สร้างบัญชีพนักงาน",
                   style: TextStyle(
@@ -93,7 +91,6 @@ class _SignUpScreenState
                     color: Colors.white,
                   ),
                 ),
-
                 const SizedBox(height: 40),
 
                 _input(
@@ -102,19 +99,24 @@ class _SignUpScreenState
                   Icons.person,
                 ),
                 const SizedBox(height: 14),
-
                 _input(email, "อีเมล", Icons.email),
                 const SizedBox(height: 14),
 
-                _password(password, "รหัสผ่าน", () {
-                  setState(() => obscure1 = !obscure1);
-                }, obscure1),
-
+                _password(
+                  password,
+                  "รหัสผ่าน",
+                  () =>
+                      setState(() => obscure1 = !obscure1),
+                  obscure1,
+                ),
                 const SizedBox(height: 14),
-
-                _password(confirm, "ยืนยันรหัสผ่าน", () {
-                  setState(() => obscure2 = !obscure2);
-                }, obscure2),
+                _password(
+                  confirm,
+                  "ยืนยันรหัสผ่าน",
+                  () =>
+                      setState(() => obscure2 = !obscure2),
+                  obscure2,
+                ),
 
                 const SizedBox(height: 25),
 
@@ -141,7 +143,6 @@ class _SignUpScreenState
                 ),
 
                 const SizedBox(height: 14),
-
                 GestureDetector(
                   onTap: () => context.push('/login'),
                   child: const Text(

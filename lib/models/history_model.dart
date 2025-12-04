@@ -14,6 +14,7 @@ class HistoryModel with _$HistoryModel {
     @JsonKey(name: 'table_name') String? tableName,
     @JsonKey(name: 'user_id') String? userId,
     @JsonKey(name: 'user_email') String? userEmail,
+    @JsonKey(name: 'user_name') String? userName,
   }) = _HistoryModel;
 
   factory HistoryModel.fromJson(

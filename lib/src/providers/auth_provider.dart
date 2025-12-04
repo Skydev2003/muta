@@ -14,35 +14,44 @@ class AuthController
     extends StateNotifier<AsyncValue<User?>> {
   AuthController() : super(const AsyncValue.data(null));
 
-  /// Login
+  /// 🔐 LOGIN
   Future<void> signIn({
     required String email,
     required String password,
   }) async {
     try {
       state = const AsyncLoading();
+
       final response = await supabaseAuth
           .signInWithPassword(
             email: email,
             password: password,
           );
+
       state = AsyncData(response.user);
     } catch (err, stack) {
       state = AsyncError(err, stack);
     }
   }
 
-  /// Sign up
+  /// 🆕 SIGNUP — เพิ่ม username ลง metadata
   Future<void> signUp({
     required String email,
     required String password,
+    required String username,
   }) async {
     try {
       state = const AsyncLoading();
+
       final response = await supabaseAuth.signUp(
         email: email,
         password: password,
+        data: {
+          "username":
+              username, // ← บันทึก user_name ใน metadata
+        },
       );
+
       state = AsyncData(response.user);
     } catch (err, stack) {
       state = AsyncError(err, stack);
@@ -65,20 +74,22 @@ class AuthController
     }
   }
 
-  /// Update password with token from reset link
+  /// ตั้งรหัสผ่านใหม่หลังคลิกลิงก์ reset
   Future<void> updatePassword(String newPassword) async {
     try {
       state = const AsyncLoading();
+
       await supabaseAuth.updateUser(
         UserAttributes(password: newPassword),
       );
+
       state = AsyncData(supabaseAuth.currentUser);
     } catch (err, stack) {
       state = AsyncError(err, stack);
     }
   }
 
-  /// Logout
+  /// 🚪 LOGOUT
   Future<void> signOut() async {
     try {
       await supabaseAuth.signOut();
@@ -89,7 +100,6 @@ class AuthController
   }
 }
 
-/// Provider สำหรับ AuthController
 final authControllerProvider = StateNotifierProvider<
   AuthController,
   AsyncValue<User?>

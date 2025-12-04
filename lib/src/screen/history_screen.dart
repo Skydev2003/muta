@@ -166,7 +166,7 @@ class _HistoryScreenState
                     return GestureDetector(
                       onTap:
                           () => context.push(
-                            "/history_detail/${h.id}",
+                            '/history_detail/${h.id}',
                           ),
                       child: Container(
                         padding: const EdgeInsets.all(16),

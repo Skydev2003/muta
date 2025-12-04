@@ -37,6 +37,8 @@ mixin _$HistoryModel {
   String? get userId => throw _privateConstructorUsedError;
   @JsonKey(name: 'user_email')
   String? get userEmail => throw _privateConstructorUsedError;
+  @JsonKey(name: 'user_name')
+  String? get userName => throw _privateConstructorUsedError;
 
   /// Serializes this HistoryModel to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -64,6 +66,7 @@ abstract class $HistoryModelCopyWith<$Res> {
     @JsonKey(name: 'table_name') String? tableName,
     @JsonKey(name: 'user_id') String? userId,
     @JsonKey(name: 'user_email') String? userEmail,
+    @JsonKey(name: 'user_name') String? userName,
   });
 }
 
@@ -90,6 +93,7 @@ class _$HistoryModelCopyWithImpl<$Res, $Val extends HistoryModel>
     Object? tableName = freezed,
     Object? userId = freezed,
     Object? userEmail = freezed,
+    Object? userName = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -133,6 +137,11 @@ class _$HistoryModelCopyWithImpl<$Res, $Val extends HistoryModel>
                     ? _value.userEmail
                     : userEmail // ignore: cast_nullable_to_non_nullable
                         as String?,
+            userName:
+                freezed == userName
+                    ? _value.userName
+                    : userName // ignore: cast_nullable_to_non_nullable
+                        as String?,
           )
           as $Val,
     );
@@ -157,6 +166,7 @@ abstract class _$$HistoryModelImplCopyWith<$Res>
     @JsonKey(name: 'table_name') String? tableName,
     @JsonKey(name: 'user_id') String? userId,
     @JsonKey(name: 'user_email') String? userEmail,
+    @JsonKey(name: 'user_name') String? userName,
   });
 }
 
@@ -182,6 +192,7 @@ class __$$HistoryModelImplCopyWithImpl<$Res>
     Object? tableName = freezed,
     Object? userId = freezed,
     Object? userEmail = freezed,
+    Object? userName = freezed,
   }) {
     return _then(
       _$HistoryModelImpl(
@@ -225,6 +236,11 @@ class __$$HistoryModelImplCopyWithImpl<$Res>
                 ? _value.userEmail
                 : userEmail // ignore: cast_nullable_to_non_nullable
                     as String?,
+        userName:
+            freezed == userName
+                ? _value.userName
+                : userName // ignore: cast_nullable_to_non_nullable
+                    as String?,
       ),
     );
   }
@@ -242,6 +258,7 @@ class _$HistoryModelImpl implements _HistoryModel {
     @JsonKey(name: 'table_name') this.tableName,
     @JsonKey(name: 'user_id') this.userId,
     @JsonKey(name: 'user_email') this.userEmail,
+    @JsonKey(name: 'user_name') this.userName,
   });
 
   factory _$HistoryModelImpl.fromJson(Map<String, dynamic> json) =>
@@ -271,10 +288,13 @@ class _$HistoryModelImpl implements _HistoryModel {
   @override
   @JsonKey(name: 'user_email')
   final String? userEmail;
+  @override
+  @JsonKey(name: 'user_name')
+  final String? userName;
 
   @override
   String toString() {
-    return 'HistoryModel(id: $id, sessionId: $sessionId, totalPrice: $totalPrice, items: $items, createdAt: $createdAt, tableName: $tableName, userId: $userId, userEmail: $userEmail)';
+    return 'HistoryModel(id: $id, sessionId: $sessionId, totalPrice: $totalPrice, items: $items, createdAt: $createdAt, tableName: $tableName, userId: $userId, userEmail: $userEmail, userName: $userName)';
   }
 
   @override
@@ -294,7 +314,9 @@ class _$HistoryModelImpl implements _HistoryModel {
                 other.tableName == tableName) &&
             (identical(other.userId, userId) || other.userId == userId) &&
             (identical(other.userEmail, userEmail) ||
-                other.userEmail == userEmail));
+                other.userEmail == userEmail) &&
+            (identical(other.userName, userName) ||
+                other.userName == userName));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -309,6 +331,7 @@ class _$HistoryModelImpl implements _HistoryModel {
     tableName,
     userId,
     userEmail,
+    userName,
   );
 
   /// Create a copy of HistoryModel
@@ -335,6 +358,7 @@ abstract class _HistoryModel implements HistoryModel {
     @JsonKey(name: 'table_name') final String? tableName,
     @JsonKey(name: 'user_id') final String? userId,
     @JsonKey(name: 'user_email') final String? userEmail,
+    @JsonKey(name: 'user_name') final String? userName,
   }) = _$HistoryModelImpl;
 
   factory _HistoryModel.fromJson(Map<String, dynamic> json) =
@@ -364,6 +388,9 @@ abstract class _HistoryModel implements HistoryModel {
   @override
   @JsonKey(name: 'user_email')
   String? get userEmail;
+  @override
+  @JsonKey(name: 'user_name')
+  String? get userName;
 
   /// Create a copy of HistoryModel
   /// with the given fields replaced by the non-null parameter values.
