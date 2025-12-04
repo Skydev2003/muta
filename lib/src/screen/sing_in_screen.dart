@@ -35,7 +35,7 @@ class _SignInScreenState
               content: Text("เข้าสู่ระบบสำเร็จ"),
             ),
           );
-          context.go('/table');
+          context.go('/');
         }
       },
       error: (e, _) {

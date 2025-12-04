@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lottie/lottie.dart';
 import 'package:muta/src/providers/auth_provider.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -33,7 +34,6 @@ class HomeScreen extends ConsumerWidget {
                   await ref
                       .read(authControllerProvider.notifier)
                       .signOut();
-
                   // เมื่อ signOut จะเป็น null แล้ว redirect กลับ /login
                   context.go('/login');
                 },
@@ -53,12 +53,14 @@ class HomeScreen extends ConsumerWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // โลโก้หรือไอคอนร้าน
-            Icon(
-              Icons.local_fire_department,
-              size: 80,
-              color: theme.colorScheme.secondary,
+            Center(
+              child: Lottie.asset(
+                'assets/lottie/Fire.json',
+                width: 180,
+                height: 180,
+                fit: BoxFit.contain,
+              ),
             ),
-
             const SizedBox(height: 40),
 
             // ปุ่มเปิดโต๊ะ
