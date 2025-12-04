@@ -1,21 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:muta/src/providers/auth_provider.dart';
 
-class SignUpScreen extends StatefulWidget {
+class SignUpScreen extends ConsumerStatefulWidget {
   const SignUpScreen({super.key});
 
   @override
-  State<SignUpScreen> createState() => _SignUpScreenState();
+  ConsumerState<SignUpScreen> createState() =>
+      _SignUpScreenState();
 }
 
-class _SignUpScreenState extends State<SignUpScreen> {
+class _SignUpScreenState
+    extends ConsumerState<SignUpScreen> {
   final username = TextEditingController();
   final email = TextEditingController();
   final password = TextEditingController();
   final confirm = TextEditingController();
 
-  bool loading = false;
   bool obscure1 = true;
   bool obscure2 = true;
 
@@ -27,37 +29,48 @@ class _SignUpScreenState extends State<SignUpScreen> {
       return;
     }
 
-    try {
-      setState(() => loading = true);
+    final auth = ref.read(authControllerProvider.notifier);
 
-      await Supabase.instance.client.auth.signUp(
-        email: email.text.trim(),
-        password: password.text.trim(),
-        data: {"username": username.text.trim()},
-      );
+    await auth.signUp(
+      email: email.text.trim(),
+      password: password.text.trim(),
+    );
 
-      if (!mounted) return;
+    final state = ref.read(authControllerProvider);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            "สมัครสมาชิกสำเร็จ กรุณายืนยันอีเมล",
+    state.when(
+      data: (_) async {
+        // ⭐ 1) บังคับ logout หลังสมัครสมาชิก
+        await auth.signOut();
+
+        // ⭐ 2) แจ้งเตือนผู้ใช้
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              "สมัครสมาชิกสำเร็จ! กรุณาเข้าสู่ระบบ",
+            ),
           ),
-        ),
-      );
+        );
 
-      context.go('/sign-in');
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("สมัครล้มเหลว: $e")),
-      );
-    } finally {
-      setState(() => loading = false);
-    }
+        // ⭐ 3) กลับหน้า login แบบไม่มีปัญหา redirect
+        context.go('/login');
+      },
+      error: (e, _) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("สมัครล้มเหลว: $e")),
+        );
+      },
+      loading: () {},
+    );
   }
+
 
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authControllerProvider);
+    final loading = authState.isLoading;
+
     return Scaffold(
       backgroundColor: const Color(0xFF1A1123),
       body: Padding(
@@ -116,9 +129,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                   ),
                   onPressed: loading ? null : _register,
-                  child: const Text(
-                    "สมัครสมาชิก",
-                    style: TextStyle(
+                  child: Text(
+                    loading
+                        ? "กำลังสมัครสมาชิก..."
+                        : "สมัครสมาชิก",
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 18,
                     ),
@@ -128,7 +143,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 const SizedBox(height: 14),
 
                 GestureDetector(
-                  onTap: () => context.push('/sign-in'),
+                  onTap: () => context.push('/login'),
                   child: const Text(
                     "มีบัญชีอยู่แล้ว? เข้าสู่ระบบ",
                     style: TextStyle(color: Colors.white70),

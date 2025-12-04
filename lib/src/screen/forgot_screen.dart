@@ -1,44 +1,50 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:muta/src/providers/auth_provider.dart';
 
-class ForgotPasswordScreen extends StatefulWidget {
+class ForgotPasswordScreen extends ConsumerStatefulWidget {
   const ForgotPasswordScreen({super.key});
 
   @override
-  State<ForgotPasswordScreen> createState() =>
+  ConsumerState<ForgotPasswordScreen> createState() =>
       _ForgotPasswordScreenState();
 }
 
 class _ForgotPasswordScreenState
-    extends State<ForgotPasswordScreen> {
+    extends ConsumerState<ForgotPasswordScreen> {
   final email = TextEditingController();
-  bool loading = false;
 
   Future<void> _reset() async {
-    try {
-      setState(() => loading = true);
+    final auth = ref.read(authControllerProvider.notifier);
 
-      await Supabase.instance.client.auth
-          .resetPasswordForEmail(email.text.trim());
+    await auth.resetPassword(email.text.trim());
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            "ส่งลิงก์รีเซ็ตรหัสผ่านไปที่อีเมลแล้ว",
+    final state = ref.read(authControllerProvider);
+
+    state.when(
+      data: (_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              "ส่งลิงก์รีเซ็ตรหัสผ่านไปที่อีเมลแล้ว",
+            ),
           ),
-        ),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("ส่งลิงก์ล้มเหลว: $e")),
-      );
-    } finally {
-      setState(() => loading = false);
-    }
+        );
+      },
+      error: (e, _) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("ส่งลิงก์ล้มเหลว: $e")),
+        );
+      },
+      loading: () {},
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authControllerProvider);
+    final loading = authState.isLoading;
+
     return Scaffold(
       backgroundColor: const Color(0xFF1A1123),
       body: Padding(

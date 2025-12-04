@@ -16,24 +16,21 @@ final router = GoRouter(
   initialLocation: '/login',
 
   redirect: (context, state) {
-  final user = Supabase.instance.client.auth.currentUser;
+    final user = Supabase.instance.client.auth.currentUser;
 
-  // หน้า public ที่ไม่ต้องล็อคอิน
-  final isAuthPage = state.matchedLocation == '/login' ||
-      state.matchedLocation == '/signup' ||
-      state.matchedLocation == '/forgot';
+    final isAuthPage =
+        state.matchedLocation == '/login' ||
+        state.matchedLocation == '/signup' ||
+        state.matchedLocation == '/forgot';
 
-  // ยังไม่ล็อคอิน → เข้าได้เฉพาะหน้า auth
-  if (user == null) {
-    return isAuthPage ? null : '/login';
-  }
+    if (user == null) {
+      return isAuthPage ? null : '/login';
+    }
 
-  // ถ้าล็อคอินแล้ว ไม่ต้องกลับหน้า login/signup/forgot อีก
-  if (isAuthPage) return '/';
+    if (isAuthPage) return '/';
 
-  return null;
-},
-
+    return null;
+  },
 
   routes: [
     GoRoute(
@@ -48,16 +45,14 @@ final router = GoRouter(
       path: '/forgot',
       builder: (_, __) => const ForgotPasswordScreen(),
     ),
-
     GoRoute(
       path: '/',
-      builder: (context, state) => const HomeScreen(),
+      builder: (_, __) => const HomeScreen(),
     ),
     GoRoute(
       path: '/table',
-      builder: (context, state) => const TableScreen(),
+      builder: (_, __) => const TableScreen(),
     ),
-
     GoRoute(
       path: '/openTable/:id',
       builder: (context, state) {
@@ -65,7 +60,6 @@ final router = GoRouter(
         return OpenTableScreen(id: id);
       },
     ),
-
     GoRoute(
       path: '/table_detail/:id',
       builder: (context, state) {
@@ -73,35 +67,30 @@ final router = GoRouter(
         return TableDetailScreen(id: id);
       },
     ),
-
     GoRoute(
       path: '/cart/:id',
-      builder: (context, state) {
+      builder: (_, state) {
         final id = int.parse(state.pathParameters['id']!);
         return CartScreen(tableId: id);
       },
     ),
-
     GoRoute(
       path: '/billing/:id',
-      builder: (context, state) {
+      builder: (_, state) {
         final id = int.parse(state.pathParameters['id']!);
         return BillingScreen(tableId: id);
       },
     ),
-
     GoRoute(
       path: '/history',
-      builder: (context, state) => const HistoryScreen(),
+      builder: (_, __) => const HistoryScreen(),
     ),
-
     GoRoute(
       path: '/cleanTable/:id',
-      builder: (context, state) {
+      builder: (_, state) {
         final id = int.parse(state.pathParameters['id']!);
         return CleanTableScreen(tableId: id);
       },
     ),
   ],
 );
-

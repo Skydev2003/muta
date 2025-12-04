@@ -1,47 +1,57 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:muta/src/providers/auth_provider.dart';
 
-class SignInScreen extends StatefulWidget {
+class SignInScreen extends ConsumerStatefulWidget {
   const SignInScreen({super.key});
 
   @override
-  State<SignInScreen> createState() => _SignInScreenState();
+  ConsumerState<SignInScreen> createState() =>
+      _SignInScreenState();
 }
 
-class _SignInScreenState extends State<SignInScreen> {
+class _SignInScreenState
+    extends ConsumerState<SignInScreen> {
   final email = TextEditingController();
   final password = TextEditingController();
-  bool loading = false;
   bool obscure = true;
 
   Future<void> _login() async {
-    try {
-      setState(() => loading = true);
+    final auth = ref.read(authControllerProvider.notifier);
 
-      await Supabase.instance.client.auth
-          .signInWithPassword(
-            email: email.text.trim(),
-            password: password.text.trim(),
+    await auth.signIn(
+      email: email.text,
+      password: password.text,
+    );
+
+    final state = ref.read(authControllerProvider);
+
+    state.when(
+      data: (user) {
+        if (user != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("เข้าสู่ระบบสำเร็จ"),
+            ),
           );
-
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("เข้าสู่ระบบสำเร็จ")),
-      );
-
-      context.go('/table');
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("เข้าสู่ระบบล้มเหลว: $e")),
-      );
-    } finally {
-      setState(() => loading = false);
-    }
+          context.go('/table');
+        }
+      },
+      error: (e, _) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("เข้าสู่ระบบล้มเหลว: $e")),
+        );
+      },
+      loading: () {},
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authControllerProvider);
+    final loading = authState.isLoading;
+
     return Scaffold(
       backgroundColor: const Color(0xFF1A1123),
       body: Padding(
@@ -96,9 +106,7 @@ class _SignInScreenState extends State<SignInScreen> {
                 const SizedBox(height: 14),
 
                 GestureDetector(
-                  onTap: () {
-                    context.push('/forgot');
-                  },
+                  onTap: () => context.push('/forgot'),
                   child: const Text(
                     "ลืมรหัสผ่าน?",
                     style: TextStyle(color: Colors.white70),
@@ -106,13 +114,6 @@ class _SignInScreenState extends State<SignInScreen> {
                 ),
 
                 const SizedBox(height: 40),
-
-                const Text(
-                  "ยังไม่มีบัญชี?",
-                  style: TextStyle(color: Colors.white60),
-                ),
-
-                const SizedBox(height: 10),
 
                 OutlinedButton(
                   style: OutlinedButton.styleFrom(
@@ -180,9 +181,8 @@ class _SignInScreenState extends State<SignInScreen> {
                 : Icons.visibility,
             color: Colors.white70,
           ),
-          onPressed: () {
-            setState(() => obscure = !obscure);
-          },
+          onPressed:
+              () => setState(() => obscure = !obscure),
         ),
         filled: true,
         fillColor: const Color(0xFF2A1A3C),
