@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lottie/lottie.dart';
 
 import 'package:muta/models/menu_model.dart';
 import 'package:muta/src/providers/menu_provider.dart';
@@ -164,9 +165,12 @@ class _TableDetailScreenState
                 );
               },
               loading:
-                  () => const Center(
-                    child: CircularProgressIndicator(
-                      color: Colors.white,
+                  () => Center(
+                    child: Lottie.asset(
+                      'assets/lottie/Loading.json',
+                      width: 300,
+                      height: 300,
+                      fit: BoxFit.contain,
                     ),
                   ),
               error:

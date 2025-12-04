@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lottie/lottie.dart';
 import 'package:muta/models/history_model.dart';
 import 'package:muta/src/providers/history_provider.dart';
 import 'package:muta/src/services/logger.dart';
@@ -82,7 +83,9 @@ class _HistoryScreenState
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: IconButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      //go to date filter dialog
+                    },
                     icon: const Icon(
                       Icons.calendar_month,
                       color: Colors.white70,
@@ -230,9 +233,12 @@ class _HistoryScreenState
                 );
               },
               loading:
-                  () => const Center(
-                    child: CircularProgressIndicator(
-                      color: Colors.white,
+                  () => Center(
+                    child: Lottie.asset(
+                      'assets/lottie/Loading.json',
+                      width: 300,
+                      height: 300,
+                      fit: BoxFit.contain,
                     ),
                   ),
               error:

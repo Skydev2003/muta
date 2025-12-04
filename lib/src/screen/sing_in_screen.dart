@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lottie/lottie.dart';
 import 'package:muta/src/providers/auth_provider.dart';
 
 class SignInScreen extends ConsumerStatefulWidget {
@@ -43,7 +44,16 @@ class _SignInScreenState
           SnackBar(content: Text("เข้าสู่ระบบล้มเหลว: $e")),
         );
       },
-      loading: () {},
+      loading: () {
+        Center(
+          child: Lottie.asset(
+            'assets/lottie/Loading.json',
+            width: 300,
+            height: 300,
+            fit: BoxFit.contain,
+          ),
+        );
+      },
     );
   }
 

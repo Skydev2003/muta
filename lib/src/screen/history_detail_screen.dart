@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lottie/lottie.dart';
 import 'package:muta/src/providers/history_provider.dart';
 import 'package:muta/src/providers/order_provider.dart';
 
@@ -131,8 +132,13 @@ class HistoryDetailScreen extends ConsumerWidget {
                     );
                   },
                   loading:
-                      () => const Center(
-                        child: CircularProgressIndicator(),
+                      () => Center(
+                        child: Lottie.asset(
+                          'assets/lottie/Loading.json',
+                          width: 300,
+                          height: 300,
+                          fit: BoxFit.contain,
+                        ),
                       ),
                   error:
                       (e, _) => Text(
@@ -147,8 +153,13 @@ class HistoryDetailScreen extends ConsumerWidget {
           );
         },
         loading:
-            () => const Center(
-              child: CircularProgressIndicator(),
+            () => Center(
+              child: Lottie.asset(
+                'assets/lottie/Loading.json',
+                width: 300,
+                height: 300,
+                fit: BoxFit.contain,
+              ),
             ),
         error:
             (e, _) => Center(

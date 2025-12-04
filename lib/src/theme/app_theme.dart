@@ -4,9 +4,7 @@ class AppTheme {
   // ---------------------------------------------------------
   // COLOR SYSTEM
   // ---------------------------------------------------------
-  static const Color bgDark = Color(
-    0xFF1A1123,
-  ); // พื้นหลังเข้ม
+  static const Color bgDark = Color.fromRGBO(26, 17, 35, 1); // พื้นหลังเข้ม
   static const Color cardDark = Color(
     0xFF251832,
   ); // การ์ดเข้ม

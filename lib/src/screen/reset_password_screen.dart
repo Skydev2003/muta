@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lottie/lottie.dart';
 import 'package:muta/src/providers/auth_provider.dart';
 
 class ResetPasswordScreen extends ConsumerStatefulWidget {
@@ -82,10 +83,18 @@ class _ResetPasswordScreenState
           SnackBar(content: Text("อัปเดตล้มเหลว: $e")),
         );
       },
-      loading: () {},
+      loading: () {
+        Center(
+          child: Lottie.asset(
+            'assets/lottie/Loading.json',
+            width: 300,
+            height: 300,
+            fit: BoxFit.contain,
+          ),
+        );
+      },
     );
   }
-
 
   @override
   Widget build(BuildContext context) {

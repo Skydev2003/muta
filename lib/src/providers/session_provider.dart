@@ -45,3 +45,37 @@ final sessionByTableProvider =
 
       return session;
     });
+
+  
+// Provider สำหรับคำนวณเวลาที่ใช้ในโต๊ะนั้น ๆ
+final timeUsedProvider = StreamProvider.family<String, int>(
+  (ref, tableId) async* {
+    final supabase = Supabase.instance.client;
+
+    // ดึง session ล่าสุดของโต๊ะ
+    final response =
+        await supabase
+            .from('table_sessions')
+            .select()
+            .eq('table_id', tableId)
+            .eq('status', 'using')
+            .order('id', ascending: false)
+            .limit(1)
+            .maybeSingle();
+
+    if (response == null) {
+      yield "00:00:00";
+      return;
+    }
+
+    final start = DateTime.parse(response['start_time']);
+
+    // เดินเวลาเองทุก 1 วินาที
+    yield* Stream.periodic(const Duration(seconds: 1), (_) {
+      final now = DateTime.now();
+      final diff = now.difference(start);
+      return diff.toString().split('.').first; // HH:mm:ss
+    });
+  },
+);
+

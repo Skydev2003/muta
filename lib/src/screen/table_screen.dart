@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lottie/lottie.dart';
+import 'package:muta/src/providers/session_provider.dart';
 import 'package:muta/src/providers/table_provider.dart';
 import 'package:muta/src/theme/app_theme.dart';
 
@@ -47,7 +49,6 @@ class TableScreen extends ConsumerWidget {
         padding: const EdgeInsets.all(16.0),
         child: tableStream.when(
           data: (tables) {
-            
             // 1) ก็อป list มาก่อนกัน side-effect
             final sorted = [...tables];
 
@@ -80,19 +81,16 @@ class TableScreen extends ConsumerWidget {
                 // onTap แยกตามสถานะโต๊ะ
                 VoidCallback onTap;
                 if (status == "available") {
-                  // เปิดโต๊ะใหม่
                   onTap =
                       () => context.push(
                         '/openTable/$tableId',
                       );
                 } else if (status == "dirty") {
-                  // หน้าเคลียร์โต๊ะ
                   onTap =
                       () => context.push(
                         '/cleanTable/$tableId',
                       );
                 } else {
-                  // using → หน้ารายการอาหารของโต๊ะ
                   onTap =
                       () => context.push(
                         '/table_detail/$tableId',
@@ -100,6 +98,7 @@ class TableScreen extends ConsumerWidget {
                 }
 
                 return _tableCard(
+                  tableId: tableId,
                   name: name,
                   status: status,
                   timeLeft: timeLeft,
@@ -109,9 +108,12 @@ class TableScreen extends ConsumerWidget {
             );
           },
           loading:
-              () => const Center(
-                child: CircularProgressIndicator(
-                  color: Colors.white,
+              () => Center(
+                child: Lottie.asset(
+                  'assets/lottie/Loading.json',
+                  width: 300,
+                  height: 300,
+                  fit: BoxFit.contain,
                 ),
               ),
           error:
@@ -130,102 +132,115 @@ class TableScreen extends ConsumerWidget {
 
   // ===================== TABLE CARD =====================
   Widget _tableCard({
-    required String name,
-    required String status,
-    required dynamic timeLeft,
-    required VoidCallback onTap,
-  }) {
-    // ICON CONFIG
-    IconData icon;
-    Color iconColor;
-    Color badgeColor;
-    String badgeText;
+  required int tableId,
+  required String name,
+  required String status,
+  required int? timeLeft,
+  required VoidCallback onTap,
+}) {
+  return Consumer(
+    builder: (context, ref, _) {
+      final asyncTime = ref.watch(timeUsedProvider(tableId));
 
-    switch (status) {
-      case "using":
-        icon = Icons.hourglass_bottom;
-        iconColor = Colors.orangeAccent;
-        badgeColor = Colors.orange;
+      // สีพื้นหลังตามสถานะ
+      Color cardColor = const Color(0xFF2C2633);
+      Color badgeColor;
+      String badgeText;
+
+      if (status == "using") {
+        badgeColor = const Color(0xFFFFA726); // เหลือง
         badgeText = "ใช้งานอยู่";
-        break;
-
-      case "dirty":
-        icon = Icons.cleaning_services;
-        iconColor = Colors.redAccent;
-        badgeColor = Colors.red;
-        badgeText = "รอทำความสะอาด";
-        break;
-
-      default: // available
-        icon = Icons.restaurant_menu;
-        iconColor = Colors.greenAccent;
-        badgeColor = Colors.green;
+      } else if (status == "dirty") {
+        badgeColor = const Color(0xFFE53935); // แดง
+        badgeText = "ทำความสะอาด";
+      } else {
+        badgeColor = const Color(0xFF43A047); // เขียว
         badgeText = "พร้อมใช้งาน";
-    }
+      }
 
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          color: AppTheme.cardDark,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // ---------- แถวบน: ชื่อโต๊ะ + ไอคอน ----------
-            Row(
-              mainAxisAlignment:
-                  MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  name,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+      // ไอคอนด้านขวาบน
+      IconData icon;
+      if (status == "using") {
+        icon = Icons.hourglass_bottom;
+      } else if (status == "dirty") {
+        icon = Icons.cleaning_services;
+      } else {
+        icon = Icons.restaurant;
+      }
+
+      return GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: cardColor,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // ไอคอนมุมขวาบน
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "โต๊ะ $name",
+                    style: const TextStyle(
+                      fontSize: 18,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Icon(icon, color: Colors.white70),
+                ],
+              ),
+
+              const SizedBox(height: 12),
+
+              if (status == "using")
+                asyncTime.when(
+                  data: (v) => Text(
+                    "ใช้ไป $v",
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 14,
+                    ),
+                  ),
+                  loading: () => const Text(
+                    "ใช้ไป ...",
+                    style: TextStyle(color: Colors.white70),
+                  ),
+                  error: (_, __) => const Text(
+                    "ใช้ไป -",
+                    style: TextStyle(color: Colors.white70),
                   ),
                 ),
-                Icon(icon, color: iconColor, size: 26),
-              ],
-            ),
 
-            const SizedBox(height: 4),
+              const Spacer(),
 
-            // ---------- เวลาเหลือ (เฉพาะ using) ----------
-            if (status == "using" && timeLeft != null)
-              Text(
-                "เหลือ $timeLeft นาที",
-                style: const TextStyle(
-                  color: Colors.white70,
-                  fontSize: 13,
+              // ปุ่มสถานะ
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
                 ),
-              ),
-
-            const Spacer(),
-
-            // ---------- Badge สถานะ ----------
-            Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 10,
-                vertical: 6,
-              ),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                badgeText,
-                style: TextStyle(
+                decoration: BoxDecoration(
                   color: badgeColor,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 13,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Text(
+                  badgeText,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
-    );
-  }
+      );
+    },
+  );
+}
 }

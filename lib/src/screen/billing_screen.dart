@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lottie/lottie.dart';
 import 'package:muta/src/providers/history_provider.dart';
 import 'package:muta/src/providers/order_provider.dart';
 import 'package:muta/src/providers/session_provider.dart';
@@ -267,9 +268,12 @@ class BillingScreen extends ConsumerWidget {
               );
             },
             loading:
-                () => const Center(
-                  child: CircularProgressIndicator(
-                    color: Colors.white,
+                () => Center(
+                  child: Lottie.asset(
+                    'assets/lottie/Loading.json',
+                    width: 300,
+                    height: 300,
+                    fit: BoxFit.contain,
                   ),
                 ),
             error:
@@ -284,9 +288,12 @@ class BillingScreen extends ConsumerWidget {
           );
         },
         loading:
-            () => const Center(
-              child: CircularProgressIndicator(
-                color: Colors.white,
+            () => Center(
+              child: Lottie.asset(
+                'assets/lottie/Loading.json',
+                width: 300,
+                height: 300,
+                fit: BoxFit.contain,
               ),
             ),
         error:

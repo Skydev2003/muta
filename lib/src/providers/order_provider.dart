@@ -8,7 +8,7 @@ class OrderNotifier
   OrderNotifier(this.ref) : super([]);
 
   final Ref ref;
-// เพิ่มรายการอาหารลงในออเดอร์
+  // เพิ่มรายการอาหารลงในออเดอร์
   void addItem(MenuModel menu) {
     final index = state.indexWhere(
       (o) => o.menuId == menu.id,
@@ -28,7 +28,7 @@ class OrderNotifier
     }
 
     final newOrder = OrderModel(
-      menuId: menu.id, 
+      menuId: menu.id,
       quantity: 1,
       price: menu.price ?? 0,
       name: menu.name,
@@ -38,7 +38,7 @@ class OrderNotifier
     state = [...state, newOrder];
   }
 
-// เพิ่มจำนวนรายการ
+  // เพิ่มจำนวนรายการ
   void increase(int index) {
     final currentQuantity = state[index].quantity ?? 0;
 
@@ -52,6 +52,7 @@ class OrderNotifier
       ...state.sublist(index + 1),
     ];
   }
+
   // ลดจำนวนรายการ
   void decrease(int index) {
     final currentQuantity = state[index].quantity ?? 0;
@@ -74,8 +75,7 @@ class OrderNotifier
     }
   }
 
-
-// ล้างออเดอร์ทั้งหมด
+  // ล้างออเดอร์ทั้งหมด
   void clear() => state = [];
 
   int get totalPrice => state.fold(
@@ -104,8 +104,8 @@ class OrderNotifier
 // Provider สำหรับจัดการออเดอร์
 final orderProvider =
     StateNotifierProvider<OrderNotifier, List<OrderModel>>(
-  (ref) => OrderNotifier(ref),
-);
+      (ref) => OrderNotifier(ref),
+    );
 
 // Provider สำหรับโหลดออเดอร์ตาม sessionId
 final loadOrdersBySessionProvider = FutureProvider.family<
