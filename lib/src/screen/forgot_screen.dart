@@ -15,9 +15,31 @@ class _ForgotPasswordScreenState
   final email = TextEditingController();
 
   Future<void> _reset() async {
+    // ✅ 1) Validate email
+    final emailText = email.text.trim();
+    if (emailText.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("กรุณากรอกอีเมล")),
+      );
+      return;
+    }
+
+    if (!emailText.contains('@')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("กรุณากรอกอีเมลที่ถูกต้อง"),
+        ),
+      );
+      return;
+    }
+
     final auth = ref.read(authControllerProvider.notifier);
 
-    await auth.resetPassword(email.text.trim());
+    // ✅ 2) Call resetPassword
+    await auth.resetPassword(emailText);
+
+    // ✅ 3) Wait for state change using watch (rebuilds when state updates)
+    if (!mounted) return;
 
     final state = ref.read(authControllerProvider);
 
@@ -30,6 +52,8 @@ class _ForgotPasswordScreenState
             ),
           ),
         );
+        // ✅ 4) Clear email and optionally navigate back
+        email.clear();
       },
       error: (e, _) {
         ScaffoldMessenger.of(context).showSnackBar(

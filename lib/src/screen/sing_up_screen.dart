@@ -40,10 +40,10 @@ class _SignUpScreenState
 
     state.when(
       data: (_) async {
-        // ⭐ 1) บังคับ logout หลังสมัครสมาชิก
+        // 1) บังคับ logout หลังสมัครสมาชิก
         await auth.signOut();
 
-        // ⭐ 2) แจ้งเตือนผู้ใช้
+        // 2) แจ้งเตือนผู้ใช้
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -53,7 +53,7 @@ class _SignUpScreenState
           ),
         );
 
-        // ⭐ 3) กลับหน้า login แบบไม่มีปัญหา redirect
+        // 3) กลับหน้า login แบบไม่มีปัญหา redirect
         context.go('/login');
       },
       error: (e, _) {

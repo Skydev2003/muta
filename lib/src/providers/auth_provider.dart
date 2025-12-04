@@ -56,11 +56,23 @@ class AuthController
 
       await supabaseAuth.resetPasswordForEmail(
         email,
-        redirectTo:
-            'https://vdhaeocpcxiefuzetikh.supabase.co/auth/v1/callback',
+        redirectTo: 'io.supabase.muta://reset-password',
       );
 
       state = const AsyncData(null);
+    } catch (err, stack) {
+      state = AsyncError(err, stack);
+    }
+  }
+
+  /// Update password with token from reset link
+  Future<void> updatePassword(String newPassword) async {
+    try {
+      state = const AsyncLoading();
+      await supabaseAuth.updateUser(
+        UserAttributes(password: newPassword),
+      );
+      state = AsyncData(supabaseAuth.currentUser);
     } catch (err, stack) {
       state = AsyncError(err, stack);
     }
