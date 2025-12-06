@@ -46,7 +46,27 @@ final sessionByTableProvider =
       return session;
     });
 
-  
+/// โหลด session ตาม sessionId (ใช้กับหน้า history)
+final sessionByIdProvider =
+    FutureProvider.family<SessionModel, int>((
+      ref,
+      sessionId,
+    ) async {
+      final supabase = Supabase.instance.client;
+
+      final response = await supabase
+          .from('table_sessions')
+          .select()
+          .eq('id', sessionId)
+          .maybeSingle();
+
+      if (response == null) throw "ไม่พบ Session";
+
+      final session = SessionModel.fromJson(response);
+      return session;
+    });
+
+
 // Provider สำหรับคำนวณเวลาที่ใช้ในโต๊ะนั้น ๆ
 final timeUsedProvider = StreamProvider.family<String, int>(
   (ref, tableId) async* {
@@ -78,4 +98,3 @@ final timeUsedProvider = StreamProvider.family<String, int>(
     });
   },
 );
-

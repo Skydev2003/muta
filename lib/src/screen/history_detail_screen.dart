@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lottie/lottie.dart';
+import 'package:muta/src/providers/receipt_pdf_provider.dart';
 import 'package:muta/src/providers/history_provider.dart';
 import 'package:muta/src/providers/order_provider.dart';
+import 'package:muta/src/providers/session_provider.dart';
+import 'package:printing/printing.dart';
 
 class HistoryDetailScreen extends ConsumerWidget {
   final int id;
@@ -15,7 +18,80 @@ class HistoryDetailScreen extends ConsumerWidget {
     );
 
     return Scaffold(
-      appBar: AppBar(title: const Text("รายละเอียดบิล")),
+      appBar: AppBar(
+        title: const Text("รายละเอียดบิล"),
+        actions: [
+          // ดูใบเสร็จ PDF
+          IconButton(
+            onPressed: () async {
+              final navigator = Navigator.of(context);
+
+              try {
+                // แสดงโหลดระหว่างเตรียม PDF
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (_) => const Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                );
+
+                // โหลดข้อมูลที่ต้องใช้สร้าง PDF
+                final history = await ref.read(
+                  historyDetailProvider(id).future,
+                );
+
+                final session = await ref.read(
+                  sessionByIdProvider(history.sessionId!).future,
+                );
+
+                final orders = await ref.read(
+                  loadOrdersBySessionProvider(
+                    history.sessionId!,
+                  ).future,
+                );
+
+                final pdfBytes = await ref.read(
+                  receiptPdfProvider(
+                    ReceiptPdfInput(
+                      session: session,
+                      orders: orders,
+                      tableId: session.tableId ??
+                          _parseTableId(history.tableName),
+                    ),
+                  ).future,
+                );
+
+                if (navigator.canPop()) navigator.pop(); // close loader
+
+                // เปิดหน้า preview
+                await navigator.push(
+                  MaterialPageRoute(
+                    builder: (_) => Scaffold(
+                      appBar: AppBar(
+                        title: const Text("ใบเสร็จ (PDF)"),
+                      ),
+                      body: PdfPreview(
+                        build: (_) async => pdfBytes,
+                      ),
+                    ),
+                  ),
+                );
+              } catch (e) {
+                if (Navigator.of(context).canPop()) {
+                  Navigator.of(context).pop(); // close loader
+                }
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text("เปิดใบเสร็จไม่สำเร็จ: $e"),
+                  ),
+                );
+              }
+            },
+            icon: const Icon(Icons.receipt_long),
+          ),
+        ],
+      ),
       body: historyAsync.when(
         data: (h) {
           final created = DateTime.parse(h.createdAt!);
@@ -168,4 +244,10 @@ class HistoryDetailScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+int _parseTableId(String? tableName) {
+  if (tableName == null) return 0;
+  final cleaned = tableName.replaceAll(RegExp(r'[^0-9]'), '');
+  return int.tryParse(cleaned) ?? 0;
 }
