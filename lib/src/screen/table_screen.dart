@@ -204,16 +204,27 @@ class TableScreen extends ConsumerWidget {
                   data: (session) {
                     final left =
                         session.timeLeft ?? Duration.zero;
+                    final isOver = left <= Duration.zero;
                     final mm = left.inMinutes;
                     final ss = (left.inSeconds % 60)
                         .toString()
                         .padLeft(2, '0');
 
+                    final text =
+                        isOver
+                            ? "หมดเวลา"
+                            : "เหลือเวลา $mm:$ss นาที";
+
                     return Text(
-                      "เหลือเวลา $mm:$ss นาที",
-                      style: const TextStyle(
-                        color: Colors.white70,
+                      text,
+                      style: TextStyle(
+                        color:
+                            isOver
+                                ? Colors.redAccent
+                                : Colors.white70,
                         fontSize: 14,
+                        fontWeight:
+                            isOver ? FontWeight.bold : null,
                       ),
                     );
                   },

@@ -53,6 +53,7 @@ class _TableDetailScreenState
         title: timer.when(
           data: (session) {
             final left = session.timeLeft ?? Duration.zero;
+            final isOver = left <= Duration.zero;
 
             // นาทีทั้งหมด (ไม่ตัดเศษชั่วโมง)
             final mm = left.inMinutes;
@@ -62,11 +63,18 @@ class _TableDetailScreenState
                 .toString()
                 .padLeft(2, '0');
 
+            final text = isOver
+                ? "โต๊ะ ${widget.id} | หมดเวลา"
+                : "โต๊ะ ${widget.id} | เหลือเวลา $mm:$ss นาที";
+
             return Text(
-              "โต๊ะ ${widget.id} | เหลือเวลา $mm:$ss นาที",
-              style: const TextStyle(
-                color: Colors.white,
+              text,
+              style: TextStyle(
+                color:
+                    isOver ? Colors.redAccent : Colors.white,
                 fontSize: 15,
+                fontWeight:
+                    isOver ? FontWeight.bold : null,
               ),
             );
           },

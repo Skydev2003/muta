@@ -2,26 +2,38 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lottie/lottie.dart';
+import 'package:muta/models/order_model.dart';
+import 'package:muta/models/session_model.dart';
 import 'package:muta/src/providers/history_provider.dart';
 import 'package:muta/src/providers/order_provider.dart';
+import 'package:muta/src/providers/receipt_pdf_provider.dart';
 import 'package:muta/src/providers/session_provider.dart';
 import 'package:muta/src/providers/session_timer_provider.dart';
 import 'package:muta/src/services/logger.dart';
+import 'package:printing/printing.dart';
 
-class BillingScreen extends ConsumerWidget {
+class BillingScreen extends ConsumerStatefulWidget {
   final int tableId;
 
   const BillingScreen({super.key, required this.tableId});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<BillingScreen> createState() =>
+      _BillingScreenState();
+}
+
+class _BillingScreenState
+    extends ConsumerState<BillingScreen> {
+  bool _isProcessing = false;
+
+  @override
+  Widget build(BuildContext context) {
     final sessionAsync = ref.watch(
-      sessionByTableProvider(tableId),
+      sessionByTableProvider(widget.tableId),
     );
     final timer = ref.watch(
-      sessionTimerProvider(tableId),
+      sessionTimerProvider(widget.tableId),
     ); // << ใช้ StreamProvider
-    logger.d('Timer in BillingScreen: $timer');
 
     return Scaffold(
       backgroundColor: const Color(0xFF1A1123),
@@ -30,7 +42,7 @@ class BillingScreen extends ConsumerWidget {
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
         title: Text(
-          "ปิดบิล โต๊ะ $tableId",
+          "ปิดบิล โต๊ะ ${widget.tableId}",
           style: const TextStyle(color: Colors.white),
         ),
       ),
@@ -65,7 +77,8 @@ class BillingScreen extends ConsumerWidget {
                           Expanded(
                             child: _infoCard(
                               title: "หมายเลขโต๊ะ",
-                              value: "T0$tableId",
+                              value:
+                                  "T0${widget.tableId}",
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -83,12 +96,20 @@ class BillingScreen extends ConsumerWidget {
 
                       // =================== TIME USED (REALTIME) ===================
                       timer.when(
-                        data:
-                            (t) => _infoCard(
-                              title: "เวลาที่ใช้งาน",
-                              value:
-                                  t.timeused ?? "00:00:00",
-                            ),
+                        data: (t) {
+                          final left =
+                              t.timeLeft ?? Duration.zero;
+                          final isOver =
+                              left <= Duration.zero;
+                          final value =
+                              t.timeused ?? "00:00:00";
+
+                          return _infoCard(
+                            title: "เวลาที่ใช้งาน",
+                            value: value,
+                            isAlert: isOver,
+                          );
+                        },
                         loading:
                             () => _infoCard(
                               title: "เวลาที่ใช้งาน",
@@ -229,35 +250,31 @@ class BillingScreen extends ConsumerWidget {
                                   vertical: 14,
                                 ),
                           ),
-                          onPressed: () async {
-                            await ref
-                                .read(historyAddProvider)
-                                .addHistory(
-                                  sessionId: sessionId,
-                                  totalPrice: total,
-                                  items: orders.length,
-                                  tableName: "T$tableId",
-                                );
-
-                            await ref
-                                .read(
-                                  sessionTimeProvider
-                                      .notifier,
+                          onPressed:
+                              _isProcessing
+                                  ? null
+                                  : () => _handlePrintAndClose(
+                                        session: session,
+                                        orders: orders,
+                                        total: total,
+                                      ),
+                          child: _isProcessing
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child:
+                                      CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
                                 )
-                                .finishSession(
-                                  tableId,
-                                  sessionId,
-                                );
-
-                            context.go('/table');
-                          },
-                          child: const Text(
-                            "ปิดบิล & เคลียร์โต๊ะ",
-                            style: TextStyle(
-                              fontSize: 18,
-                              color: Colors.white,
-                            ),
-                          ),
+                              : const Text(
+                                  "ปิดบิล & พิมพ์ใบเสร็จ",
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    color: Colors.white,
+                                  ),
+                                ),
                         ),
                       ),
 
@@ -307,10 +324,76 @@ class BillingScreen extends ConsumerWidget {
     );
   }
 
-  // =================== COMPONENTS ===================
+  Future<void> _handlePrintAndClose({
+  required SessionModel session,
+  required List<OrderModel> orders,
+  required int total,
+}) async {
+  // กันไม่ให้กดปิดบิลซ้ำเวลายังประมวลผลอยู่
+  if (_isProcessing) return;
+
+  setState(() => _isProcessing = true);
+
+  try {
+    // 1) สร้าง PDF จากข้อมูล session + orders
+    final pdfBytes = await ref.read(
+      receiptPdfProvider(
+        ReceiptPdfInput(
+          session: session,
+          orders: orders,
+          tableId: widget.tableId,
+        ),
+      ).future,
+    );
+
+    // 2) เปิดหน้า Print Preview ให้ผู้ใช้สั่งพิมพ์
+    await Printing.layoutPdf(
+      onLayout: (_) async => pdfBytes,
+    );
+
+    // 3) บันทึกประวัติลง Supabase (ใช้เป็นรายการย้อนหลัง)
+    await ref.read(historyAddProvider).addHistory(
+      sessionId: session.id!,
+      totalPrice: total,
+      items: orders.length,
+      tableName: "T${widget.tableId}",
+    );
+
+    // 4) ปิด session โต๊ะนี้ (หยุด timer + อัปเดตสถานะโต๊ะ)
+    await ref
+        .read(sessionTimeProvider.notifier)
+        .finishSession(widget.tableId, session.id!);
+
+    // 5) กลับไปหน้าเลือกโต๊ะหลังปิดบิลเสร็จ
+    if (mounted) context.go('/table');
+  } catch (e, st) {
+    // ถ้ามี error ใด ๆ ให้ log รายละเอียด + แจ้งผู้ใช้ด้วย SnackBar
+    logger.e('Billing print error', error: e, stackTrace: st);
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("พิมพ์หรือปิดบิลไม่สำเร็จ: $e"),
+        ),
+      );
+    }
+  } finally {
+    // ปลดล็อกปุ่ม กรณีประมวลผลเสร็จหรือ error
+    if (mounted) {
+      setState(() => _isProcessing = false);
+    }
+  }
+}
+
+
+// =================== COMPONENTS ===================
+
+/// Widget กล่องข้อมูล (แสดงชื่อ + ค่า)
+/// เช่น "เวลาใช้งาน" → "01:23:45"
   Widget _infoCard({
     required String title,
     required String value,
+    bool isAlert = false,
   }) {
     return Container(
       padding: const EdgeInsets.symmetric(
@@ -340,6 +423,18 @@ class BillingScreen extends ConsumerWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
+          if (isAlert)
+            const Padding(
+              padding: EdgeInsets.only(top: 4),
+              child: Text(
+                "หมดเวลา",
+                style: TextStyle(
+                  color: Colors.redAccent,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
         ],
       ),
     );
