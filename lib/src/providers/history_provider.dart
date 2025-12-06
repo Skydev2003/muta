@@ -27,10 +27,14 @@ final historyProvider = StreamProvider<List<HistoryModel>>((
 /// 🔥 2) Provider สำหรับเพิ่มประวัติ (ใช้ตอนปิดบิล)
 /// ------------------------------------------------------------
 final historyAddProvider = Provider((ref) {
-  return HistoryRepository();
+  return HistoryRepository(ref);
 });
 
 class HistoryRepository {
+  final Ref ref;
+
+  HistoryRepository(this.ref);
+
   Future<void> addHistory({
     required int sessionId,
     required int totalPrice,
@@ -38,9 +42,25 @@ class HistoryRepository {
     required String tableName,
   }) async {
     final supabase = Supabase.instance.client;
+    final authUser = supabase.auth.currentUser;
 
-    // ข้อมูล user ที่ล็อกอินอยู่
-    final user = supabase.auth.currentUser;
+    if (authUser == null) {
+      throw "ยังไม่ได้ล็อกอิน";
+    }
+
+    // ⭐ โหลดข้อมูล user จาก table users
+    final userData = await supabase
+        .from('users')
+        .select()
+        .eq('user_id', authUser.id)
+        .maybeSingle();
+
+    if (userData == null) {
+      throw "ไม่พบข้อมูลผู้ใช้ใน table users";
+    }
+
+    final userName = userData['user_name'];
+    final userEmail = userData['user_email'];
 
     await supabase.from('history').insert({
       'session_id': sessionId,
@@ -48,14 +68,14 @@ class HistoryRepository {
       'items': items,
       'table_name': "T${tableName.replaceAll('T', '').padLeft(2, '0')}",
 
-      // 🟣 บันทึกข้อมูลพนักงานให้ครบ
-      'user_id': user?.id,
-      'user_email': user?.email,
-      'user_name':
-          user?.userMetadata?['username'], // ⬅ สำคัญ !!
+      // ⭐ บันทึกจาก table users แทนการใช้ metadata
+      'user_id': authUser.id,
+      'user_email': userEmail,
+      'user_name': userName,
     });
   }
 }
+
 
 
 //history detail 

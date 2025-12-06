@@ -8,6 +8,7 @@ import 'package:muta/src/screen/history_detail_screen.dart';
 import 'package:muta/src/screen/history_screen.dart';
 import 'package:muta/src/screen/home_screen.dart';
 import 'package:muta/src/screen/opentable_screen.dart';
+import 'package:muta/src/screen/profile_screen.dart';
 import 'package:muta/src/screen/reset_password_screen.dart';
 import 'package:muta/src/screen/sing_in_screen.dart';
 import 'package:muta/src/screen/sing_up_screen.dart';
@@ -145,6 +146,10 @@ final router = GoRouter(
           (_, state) => CleanTableScreen(
             tableId: int.parse(state.pathParameters['id']!),
           ),
+    ),
+    GoRoute(
+      path: '/profile',
+      builder: (_, __) => const ProfileScreen(),
     ),
   ],
 );

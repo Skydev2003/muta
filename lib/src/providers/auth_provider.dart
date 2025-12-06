@@ -10,9 +10,22 @@ final authStateProvider = StreamProvider<User?>((ref) {
   });
 });
 
-class AuthController
-    extends StateNotifier<AsyncValue<User?>> {
+class AuthController extends StateNotifier<AsyncValue<User?>> {
   AuthController() : super(const AsyncValue.data(null));
+
+  final _client = Supabase.instance.client;
+
+  /// 🧩 สร้าง row ใน table `users` หลังสมัครเสร็จ
+  Future<void> _createUserRow({
+    required User user,
+    required String username,
+  }) async {
+    await _client.from('users').insert({
+      'user_id': user.id,
+      'user_email': user.email,
+      'user_name': username,
+    });
+  }
 
   /// 🔐 LOGIN
   Future<void> signIn({
@@ -22,11 +35,10 @@ class AuthController
     try {
       state = const AsyncLoading();
 
-      final response = await supabaseAuth
-          .signInWithPassword(
-            email: email,
-            password: password,
-          );
+      final response = await supabaseAuth.signInWithPassword(
+        email: email,
+        password: password,
+      );
 
       state = AsyncData(response.user);
     } catch (err, stack) {
@@ -34,7 +46,7 @@ class AuthController
     }
   }
 
-  /// 🆕 SIGNUP — เพิ่ม username ลง metadata
+  /// 🆕 SIGNUP — เพิ่ม username ลง metadata + insert ลง table users
   Future<void> signUp({
     required String email,
     required String password,
@@ -47,12 +59,23 @@ class AuthController
         email: email,
         password: password,
         data: {
-          "username":
-              username, // ← บันทึก user_name ใน metadata
+          "username": username, // เก็บใน auth metadata
         },
       );
 
-      state = AsyncData(response.user);
+      final user = response.user;
+
+      if (user == null) {
+        throw "สมัครสำเร็จ แต่ไม่ได้ user กลับมา";
+      }
+
+      // ⭐ เพิ่มข้อมูลลง table users
+      await _createUserRow(
+        user: user,
+        username: username,
+      );
+
+      state = AsyncData(user);
     } catch (err, stack) {
       state = AsyncError(err, stack);
     }
@@ -100,7 +123,7 @@ class AuthController
   }
 }
 
-final authControllerProvider = StateNotifierProvider<
-  AuthController,
-  AsyncValue<User?>
->((ref) => AuthController());
+final authControllerProvider =
+    StateNotifierProvider<AuthController, AsyncValue<User?>>(
+  (ref) => AuthController(),
+);

@@ -25,7 +25,12 @@ class HomeScreen extends ConsumerWidget {
           ),
         ),
         centerTitle: true,
-
+        leading: IconButton(
+          onPressed: () {
+            ref.context.push('/profile');
+          },
+          icon: const Icon(Icons.person, color: Colors.white),
+        ),
         actions: [
           Consumer(
             builder: (context, ref, child) {
@@ -44,6 +49,7 @@ class HomeScreen extends ConsumerWidget {
               );
             },
           ),
+          
         ],
       ),
 
