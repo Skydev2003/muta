@@ -1,8 +1,6 @@
 name: muta
 description: "Muta App"
-
-publish_to: 'none' 
-
+publish_to: 'none'
 
 version: 1.0.0+1
 
@@ -14,49 +12,57 @@ dependencies:
   flutter:
     sdk: flutter
 
-  
   # State Management
   flutter_riverpod: ^2.4.9
   riverpod_annotation: ^2.3.3
- 
-  
+
   # Hooks
   flutter_hooks: ^0.20.3
   hooks_riverpod: ^2.4.9
-  
+
   # Code Generation
   freezed_annotation: ^2.4.1
   json_annotation: ^4.8.1
-  
+
   # Navigation
   go_router: ^14.6.2
-  
+
   # UI
   material_design_icons_flutter: ^7.0.7296
   supabase_flutter: ^2.10.3
   logger: ^2.6.2
   lottie: ^3.3.2
-  
- 
 
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
-  
+
   # Code Generation
   build_runner: ^2.4.7
   freezed: ^2.4.6
   json_serializable: ^6.7.1
   riverpod_generator: ^2.3.9
   objectbox_generator: ^4.0.2
-  
+
   # App Icon Generator
   flutter_launcher_icons: ^0.14.1
+
 
 flutter:
   uses-material-design: true
 
   assets:
     - assets/lottie/
+    - assets/icon/
+
+
+# ------------------------------------------------------
+#  🔥 CONFIG ของ flutter_launcher_icons ต้องอยู่นอก dependencies
+# ------------------------------------------------------
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon/app_icon.png"
+  min_sdk_android: 21
