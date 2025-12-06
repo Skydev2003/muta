@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lottie/lottie.dart';
-import 'package:muta/src/providers/session_provider.dart';
+import 'package:muta/src/providers/session_timer_provider.dart';
 import 'package:muta/src/providers/table_provider.dart';
 import 'package:muta/src/theme/app_theme.dart';
 
@@ -140,7 +140,9 @@ class TableScreen extends ConsumerWidget {
 }) {
   return Consumer(
     builder: (context, ref, _) {
-      final asyncTime = ref.watch(timeUsedProvider(tableId));
+      final timer = ref.watch(
+        sessionTimerProvider(tableId),
+      );
 
       // สีพื้นหลังตามสถานะ
       Color cardColor = const Color(0xFF2C2633);
@@ -198,20 +200,29 @@ class TableScreen extends ConsumerWidget {
               const SizedBox(height: 12),
 
               if (status == "using")
-                asyncTime.when(
-                  data: (v) => Text(
-                    "ใช้ไป $v",
-                    style: const TextStyle(
-                      color: Colors.white70,
-                      fontSize: 14,
-                    ),
-                  ),
+                timer.when(
+                  data: (session) {
+                    final left =
+                        session.timeLeft ?? Duration.zero;
+                    final mm = left.inMinutes;
+                    final ss = (left.inSeconds % 60)
+                        .toString()
+                        .padLeft(2, '0');
+
+                    return Text(
+                      "เหลือเวลา $mm:$ss นาที",
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 14,
+                      ),
+                    );
+                  },
                   loading: () => const Text(
-                    "ใช้ไป ...",
+                    "เหลือเวลา ...",
                     style: TextStyle(color: Colors.white70),
                   ),
                   error: (_, __) => const Text(
-                    "ใช้ไป -",
+                    "เหลือเวลา -",
                     style: TextStyle(color: Colors.white70),
                   ),
                 ),
